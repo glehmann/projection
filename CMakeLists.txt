@@ -40,7 +40,7 @@ SET(Libraries
 #be linked to all the libraries you specified above. 
 #You can build more than one executable per project
 
-SET(CurrentExe "check")
+SET(CurrentExe "max")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 
@@ -52,5 +52,5 @@ TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 #any tests you can comment out or delete the following line.
 # ADD_TEST(Testname ExecutableToRun arg1 arg2 arg3)
 
-ADD_TEST(Run check ${INPUT_IMAGE} out.png)
-ADD_TEST(CompareImage ${IMAGE_COMPARE} out.png ${CMAKE_SOURCE_DIR}/images/test.png)
+ADD_TEST(Maximum max ${INPUT_IMAGE} maximum.tif)
+ADD_TEST(MaximumCompareImage ${IMAGE_COMPARE} maximum.tif ${CMAKE_SOURCE_DIR}/images/maximum.tif)

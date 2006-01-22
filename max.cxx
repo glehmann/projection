@@ -3,7 +3,7 @@
 #include "itkCommand.h"
 #include "itkSimpleFilterWatcher.h"
 
-#include "itkProjectionImageFilter.h"
+#include "itkMaximumProjectionImageFilter.h"
 
 
 int main(int, char * argv[])
@@ -17,7 +17,7 @@ int main(int, char * argv[])
   ReaderType::Pointer reader = ReaderType::New();
   reader->SetFileName( argv[1] );
 
-  typedef itk::ProjectionImageFilter< IType, IType > FilterType;
+  typedef itk::MaximumProjectionImageFilter< IType, IType > FilterType;
   FilterType::Pointer filter = FilterType::New();
   filter->SetInput( reader->GetOutput() );
 
