@@ -19,7 +19,7 @@ class MinimumAccumulator
 public:
   MinimumAccumulator()
     {
-    m_Minimum = NumericTraits< TInputPixel >::NonpositiveMin();
+    m_Minimum = NumericTraits< TInputPixel >::max();
     }
   ~MinimumAccumulator(){}
 

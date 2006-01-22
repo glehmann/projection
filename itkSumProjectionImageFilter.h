@@ -19,7 +19,7 @@ class SumAccumulator
 public:
   SumAccumulator()
     {
-    m_Sum = NumericTraits< TInputPixel >::NonpositiveMin();
+    m_Sum = NumericTraits< TInputPixel >::Zero;
     }
   ~SumAccumulator(){}
 
