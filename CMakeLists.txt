@@ -2,7 +2,7 @@
 PROJECT(projection)
 
 # set the name of the input image used to run the test
-SET(INPUT_IMAGE ${CMAKE_SOURCE_DIR}/images/cthead1.png)
+SET(INPUT_IMAGE ${CMAKE_SOURCE_DIR}/images/ESCells.img)
 
 #include some macros from another file...
 INCLUDE(IJMacros.txt)
@@ -48,6 +48,10 @@ SET(CurrentExe "min")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 
+SET(CurrentExe "sum")
+ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
+TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
+
 #the following line is an example of how to add a test to your project.
 #Testname is the title for this particular test.  ExecutableToRun is the
 #program which will be running this test.  It can either be a part of this
@@ -61,3 +65,7 @@ ADD_TEST(MaximumCompareImage ${IMAGE_COMPARE} maximum.tif ${CMAKE_SOURCE_DIR}/im
 
 ADD_TEST(Minimum min ${INPUT_IMAGE} minimum.tif)
 ADD_TEST(MinimumCompareImage ${IMAGE_COMPARE} minimum.tif ${CMAKE_SOURCE_DIR}/images/minimum.tif)
+
+ADD_TEST(Sum sum ${INPUT_IMAGE} sum.tif)
+ADD_TEST(SumCompareImage ${IMAGE_COMPARE} sum.tif ${CMAKE_SOURCE_DIR}/images/sum.tif)
+
