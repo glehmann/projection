@@ -3,12 +3,12 @@
 #include "itkCommand.h"
 #include "itkSimpleFilterWatcher.h"
 
-#include "itkImageFilter.h"
+#include "itkProjectionImageFilter.h"
 
 
 int main(int, char * argv[])
 {
-  const int dim = 2;
+  const int dim = 3;
   
   typedef unsigned char PType;
   typedef itk::Image< PType, dim > IType;
@@ -17,7 +17,7 @@ int main(int, char * argv[])
   ReaderType::Pointer reader = ReaderType::New();
   reader->SetFileName( argv[1] );
 
-  typedef itk::ImageFilter< IType, IType > FilterType;
+  typedef itk::ProjectionImageFilter< IType, IType > FilterType;
   FilterType::Pointer filter = FilterType::New();
   filter->SetInput( reader->GetOutput() );
 
