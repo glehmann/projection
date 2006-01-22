@@ -33,16 +33,16 @@ colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 
 % The title should be descriptive enough for people to be able to find
 % the relevant document. 
-\title{}
+\title{Image projections along an axe}
 
 % Increment the release number whenever significant changes are made.
 % The author and/or editor can define 'significant' however they like.
-\release{0.00}
+% \release{0.00}
 
 % At minimum, give your name and an email address.  You can include a
 % snail-mail address if you like.
-\author{}
-\authoraddress{}
+\author{Ga\"etan Lehmann}
+\authoraddress{Unit\'e de Biologie du D\'eveloppement et de la Reproduction, Institut National de la Recherche Agronomique, 78350 Jouy-en-Josas, France}
 
 \begin{document}
 \maketitle
@@ -54,73 +54,183 @@ colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 
 \begin{abstract}
 \noindent
-% The abstract should be a paragraph or two long, and describe the
-% scope of the document.
+Image projection is a very common task in image analysis to reduce the dimension
+of an image. A base filter is provided with some specialized filters which
+implement different projection methods.
 \end{abstract}
 
-\tableofcontents
+% \tableofcontents
+
+\section{Introduction}
+ITK already provide a class to project an image along an axe:
+\doxygen{AccumulateImageFilter}. However, this class is limited to sum
+projection and mean projection.
 
 
-% \url{http://www.itk.org}
-% \code{Insight/Documentation/Style.pdf}
-% \section{Principles of Solar Spot Detection}
-% \cite{ITKSoftwareGuide}.
-% \doxygen{ImageToImageFilter}
+\section{Implementation}
 
-% \small \begin{verbatim}
-% \end{verbatim} \normalsize
+The base class, ProjectionImageFilter, is mainly a copy of
+AccumulateImageFilter, with some enhancement:
+\begin{itemize}
+  \item projection is delegated to a functor
+  \item report its progress
+\end{itemize}
+Different projection types are provided, with specialized classes:
+\begin{itemize}
+  \item maximum projection (MaximumProjectionImageFilter)
+  \item minimum projection (MinimumProjectionImageFilter)
+  \item mean projection (MeanProjectionImageFilter)
+  \item median projection (MedianProjectionImageFilter)
+  \item sum projection (SumProjectionImageFilter)
+\end{itemize}
+Other projections types can easily be created just by providing a new functor.
 
+AccumulateImageFilter is not modifiable to implement functor support without
+breaking the API.
 
-% The {itemize} environment uses a bullet for each \item.  If you want the 
-% \item's numbered, use the {enumerate} environment instead.
-% \begin{itemize}
-%   \item  Insight Toolkit 2.4.
-%   \item  CMake 2.2
-% \end{itemize}
+\section{Performance}
 
-% \ref{cthead1}
+A timing test comparing performance on a $371 \times 371 \times 34$
+image showed that the results are similar with AccumulateImageFilter
+and the equivalent ProjectionImageFilter, and that the new projection
+types have similar performance. The results achieved on an Athlon 64 
+Processor 2800+ (1802 MHz) with 512Kb cache, 512 Mb of RAM and gcc
+4.0.2 are shown in Table~\ref{perf}.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{cc}
+\hline
+Filter & execution time \\
+\hline
+\hline
+MaximumProjectionImageFilter & 0.652 s \\
+MinimumProjectionImageFilter  & 0.614 s\\
+SumProjectionImageFilter  & 0.614 s\\
+MeanProjectionImageFilter  & 0.619 s\\
+MedianProjectionImageFilter  & 0.831 s\\
+AccumulateImageFilter, sum  & 0.615 s\\
+AccumulateImageFilter, mean  & 0.617 s\\
+\hline
+\end{tabular}
+\caption{Execution time.\label{perf}}
+\end{table}
+
+\section{Examples}
+Figure~\ref{maximum0}, Figure~\ref{maximum1}, Figure~\ref{maximum}, Figure~\ref{minimum}, Figure~\ref{mean} and Figure~\ref{median} show the result of different projection on different axes. The result of SumProjectionImageFilter in similar to the result of MeanProjectionImageFilter, but with a higher range of values, and so is not shown here.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.5]{maximum0}
-\caption{Maximum projection, axe=0.}
+\caption{MaximumProjectionImageFilter, projection along axe x.\label{maximum0}}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.5]{maximum1}
-\caption{Maximum projection, axe=1.}
+\caption{MaximumProjectionImageFilter, projection along axe y.\label{maximum1}}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.75]{maximum}
-\caption{Maximum projection, axe=2.}
+\caption{MaximumProjectionImageFilter, projection along axe z.\label{maximum}}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.75]{minimum}
-\caption{Minimum projection}
+\caption{MinimumProjectionImageFilter, projection along axe z.\label{minimum}}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.75]{mean}
-\caption{Mean projection.}
+\caption{MeanProjectionImageFilter, projection along axe z.\label{mean}}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.75]{median}
-\caption{Median projection}
+\caption{MedianProjectionImageFilter, projection along axe z\label{median}}
 \end{figure}
 
-% \begin{figure}[htbp]
-% \centering
-% \includegraphics[scale=0.75]{sum}
-% \caption{Sum projection}
-% \end{figure}
+\section{Sample code}
+
+\small \begin{verbatim}
+#include "itkImageFileReader.h"
+#include "itkImageFileWriter.h"
+#include "itkCommand.h"
+#include "itkSimpleFilterWatcher.h"
+
+#include "itkMaximumProjectionImageFilter.h"
+#include "itkExtractImageFilter.h"
+
+
+int main(int, char * argv[])
+{
+  int axe = atoi(argv[1]);
+
+  typedef unsigned char PType;
+  typedef itk::Image< PType, 3 > IType;
+  typedef itk::Image< PType, 2 > IType2;
+
+  typedef itk::ImageFileReader< IType > ReaderType;
+  ReaderType::Pointer reader = ReaderType::New();
+  reader->SetFileName( argv[2] );
+
+  typedef itk::MaximumProjectionImageFilter< IType, IType > FilterType;
+  FilterType::Pointer filter = FilterType::New();
+  filter->SetInput( reader->GetOutput() );
+  filter->SetAxe( axe );
+
+  itk::SimpleFilterWatcher watcher(filter, "filter");
+
+  filter->Update();
+
+  IType::SizeType inputSize = filter->GetOutput()->GetLargestPossibleRegion().GetSize();
+
+  typedef itk::ExtractImageFilter< IType, IType2 > ExtractType;
+  ExtractType::Pointer extract = ExtractType::New();
+  extract->SetInput( filter->GetOutput() );
+
+  IType::SizeType size;
+  for(int i=0; i<=3; i++) {
+    if(i == axe) {
+      size[i] = 0;
+    } else {
+      size[i] = inputSize[i];
+     }
+  }
+  IType::IndexType idx;
+  idx.Fill(0);
+
+  IType::RegionType region;
+  region.SetSize( size );
+  region.SetIndex( idx );
+  extract->SetExtractionRegion( region );
+
+  typedef itk::ImageFileWriter< IType2 > WriterType;
+  WriterType::Pointer writer = WriterType::New();
+  writer->SetInput( extract->GetOutput() );
+  writer->SetFileName( argv[3] );
+  writer->Update();
+
+  return 0;
+}
+\end{verbatim} \normalsize
+
+\section{Conclusion}
+The new classes give more feature and more flexibility with equivalent
+performance than the current available filter, but loss the compatibility with
+the previous filter. I propose to mark AccumulateImageFilter as deprecated in
+the next release of ITK to incite user to the new class.
+
+
+\section{Acknowledgments}
+We thank Dr Pierre Adenot and MIMA2 confocal facilities
+(\url{http://mima2.jouy.inra.fr})
+for providing image samples.
 
 
 \appendix
