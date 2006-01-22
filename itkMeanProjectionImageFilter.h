@@ -14,15 +14,15 @@ namespace itk {
 
 namespace Function {
 template <class TInputPixel, class TOuputPixel>
-class SumAccumulator
+class MeanAccumulator
 {
 public:
-  SumAccumulator()
+  MeanAccumulator()
     {
     m_Sum = NumericTraits< TInputPixel >::Zero;
     m_Count = 0;
     }
-  ~SumAccumulator(){}
+  ~MeanAccumulator(){}
 
   inline TInputPixel operator()( const TInputPixel &input )
     {
@@ -45,12 +45,12 @@ template <class TInputImage, class TOutputImage>
 class ITK_EXPORT MeanProjectionImageFilter :
     public
     ProjectionImageFilter<TInputImage, TOutputImage,
-      Function::SumAccumulator< typename TInputImage::PixelType, typename TOutputImage::PixelType > >
+      Function::MeanAccumulator< typename TInputImage::PixelType, typename TOutputImage::PixelType > >
 {
 public:
   typedef MeanProjectionImageFilter Self;
   typedef ProjectionImageFilter<TInputImage, TOutputImage, 
-    Function::SumAccumulator< typename TInputImage::PixelType, typename TOutputImage::PixelType > > Superclass;
+    Function::MeanAccumulator< typename TInputImage::PixelType, typename TOutputImage::PixelType > > Superclass;
 
   typedef SmartPointer<Self>   Pointer;
   typedef SmartPointer<const Self>  ConstPointer;
