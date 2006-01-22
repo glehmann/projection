@@ -25,7 +25,7 @@ public:
 
   inline TInputPixel operator()( const TInputPixel &input )
     {
-    m_Maximum = std::max( m_Maximum, input );
+    m_Maximum = vnl_math_max( m_Maximum, input );
     }
 
   inline TInputPixel GetValue()
