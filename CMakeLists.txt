@@ -56,6 +56,10 @@ SET(CurrentExe "mean")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 
+SET(CurrentExe "median")
+ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
+TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
+
 #the following line is an example of how to add a test to your project.
 #Testname is the title for this particular test.  ExecutableToRun is the
 #program which will be running this test.  It can either be a part of this
@@ -75,4 +79,7 @@ ADD_TEST(SumCompareImage ${IMAGE_COMPARE} sum.tif ${CMAKE_SOURCE_DIR}/images/sum
 
 ADD_TEST(Mean mean ${INPUT_IMAGE} mean.tif)
 ADD_TEST(MeanCompareImage ${IMAGE_COMPARE} mean.tif ${CMAKE_SOURCE_DIR}/images/mean.tif)
+
+ADD_TEST(Median median ${INPUT_IMAGE} median.tif)
+ADD_TEST(MedianCompareImage ${IMAGE_COMPARE} median.tif ${CMAKE_SOURCE_DIR}/images/median.tif)
 
