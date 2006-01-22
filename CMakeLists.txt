@@ -68,6 +68,10 @@ SET(CurrentExe "perf")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 
+SET(CurrentExe "maxaxe")
+ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
+TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
+
 #the following line is an example of how to add a test to your project.
 #Testname is the title for this particular test.  ExecutableToRun is the
 #program which will be running this test.  It can either be a part of this
@@ -100,3 +104,11 @@ ADD_TEST(AccumulateMean accumulate 1 ${INPUT_IMAGE} accumulate-mean.tif)
 ADD_TEST(AccumulateMeanCompareImage ${IMAGE_COMPARE} accumulate-mean.tif ${CMAKE_SOURCE_DIR}/images/mean.tif)
 
 
+ADD_TEST(Maximum0 maxaxe 0 ${INPUT_IMAGE} maximum0.tif)
+ADD_TEST(Maximum0CompareImage ${IMAGE_COMPARE} maximum0.tif ${CMAKE_SOURCE_DIR}/images/maximum0.tif)
+
+ADD_TEST(Maximum1 maxaxe 1 ${INPUT_IMAGE} maximum1.tif)
+ADD_TEST(Maximum1CompareImage ${IMAGE_COMPARE} maximum1.tif ${CMAKE_SOURCE_DIR}/images/maximum1.tif)
+
+ADD_TEST(Maximum2 maxaxe 2 ${INPUT_IMAGE} maximum2.tif)
+ADD_TEST(Maximum2CompareImage ${IMAGE_COMPARE} maximum2.tif ${CMAKE_SOURCE_DIR}/images/maximum.tif)
