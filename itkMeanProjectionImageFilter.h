@@ -6,7 +6,9 @@
 
 namespace itk {
 /** \class MeanProjectionImageFilter
- * \brief TODO
+ * \brief Mean projection
+ *
+ * \author Gaëtan Lehmann. Biologie du Développement et de la Reproduction, INRA de Jouy-en-Josas, France.
  *
  * \sa ProjectionImageFilter
  */

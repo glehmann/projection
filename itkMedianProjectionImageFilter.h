@@ -8,7 +8,9 @@
 
 namespace itk {
 /** \class MedianProjectionImageFilter
- * \brief TODO
+ * \brief Median projection
+ *
+ * \author Gaëtan Lehmann. Biologie du Développement et de la Reproduction, INRA de Jouy-en-Josas, France.
  *
  * \sa ProjectionImageFilter
  */

@@ -36,15 +36,11 @@ namespace itk
  *
  *   The dimensions of the InputImage and the OutputImage must be the same.
  *
- *
- *
  * This class is parameterized over the type of the input image and
  * the type of the output image.
  *
- *
  * \author Emiliano Beronich
- *
- * This filter was contributed by Emiliano Beronich
+ * \author Gaëtan Lehmann. Biologie du Développement et de la Reproduction, INRA de Jouy-en-Josas, France.
  *
  * \ingroup   IntensityImageFilters     Singlethreaded
  */

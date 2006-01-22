@@ -6,7 +6,9 @@
 
 namespace itk {
 /** \class MaximumProjectionImageFilter
- * \brief TODO
+ * \brief Maximum projection
+ *
+ * \author Gaëtan Lehmann. Biologie du Développement et de la Reproduction, INRA de Jouy-en-Josas, France.
  *
  * \sa ProjectionImageFilter
  */
