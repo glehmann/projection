@@ -44,6 +44,10 @@ SET(CurrentExe "max")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 
+SET(CurrentExe "min")
+ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
+TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
+
 #the following line is an example of how to add a test to your project.
 #Testname is the title for this particular test.  ExecutableToRun is the
 #program which will be running this test.  It can either be a part of this
@@ -54,3 +58,6 @@ TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 
 ADD_TEST(Maximum max ${INPUT_IMAGE} maximum.tif)
 ADD_TEST(MaximumCompareImage ${IMAGE_COMPARE} maximum.tif ${CMAKE_SOURCE_DIR}/images/maximum.tif)
+
+ADD_TEST(Minimum min ${INPUT_IMAGE} minimum.tif)
+ADD_TEST(MinimumCompareImage ${IMAGE_COMPARE} minimum.tif ${CMAKE_SOURCE_DIR}/images/minimum.tif)
