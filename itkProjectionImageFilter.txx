@@ -29,8 +29,8 @@ namespace itk
 /**
  * Constructor
  */
-template <class TInputImage, class TOutputImage >
-ProjectionImageFilter<TInputImage,TOutputImage >
+template <class TInputImage, class TOutputImage, class TAccumulator>
+ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
 ::ProjectionImageFilter()
 {
   this->SetNumberOfRequiredInputs( 1 );
@@ -38,9 +38,9 @@ ProjectionImageFilter<TInputImage,TOutputImage >
 }
 
 
-template <class TInputImage, class TOutputImage>
+template <class TInputImage, class TOutputImage, class TAccumulator>
 void
-ProjectionImageFilter<TInputImage,TOutputImage>
+ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
 ::GenerateOutputInformation()
 {
   itkDebugMacro("GenerateOutputInformation Start");
@@ -94,9 +94,9 @@ ProjectionImageFilter<TInputImage,TOutputImage>
 }
 
 
-template <class TInputImage, class  TOutputImage>
+template <class TInputImage, class  TOutputImage, class TAccumulator>
 void
-ProjectionImageFilter<TInputImage,TOutputImage>
+ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
 ::GenerateInputRequestedRegion()
 {
   itkDebugMacro("GenerateInputRequestedRegion Start");
@@ -144,9 +144,9 @@ ProjectionImageFilter<TInputImage,TOutputImage>
 /**
  * GenerateData Performs the accumulation
  */
-template <class TInputImage, class TOutputImage >
+template <class TInputImage, class TOutputImage, class TAccumulator>
 void
-ProjectionImageFilter<TInputImage,TOutputImage>
+ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
 ::GenerateData( void )
 {
   if(m_Axe>=TInputImage::ImageDimension)
@@ -188,6 +188,7 @@ ProjectionImageFilter<TInputImage,TOutputImage>
   outputIter.GoToBegin();
   while(!outputIter.IsAtEnd())
     {
+    TAccumulator accumulator;
     typename TOutputImage::IndexType OutputIndex = outputIter.GetIndex();
     for(unsigned int i=0; i<InputImageDimension; i++)
       {
@@ -206,19 +207,19 @@ ProjectionImageFilter<TInputImage,TOutputImage>
     AccumulateType Value=NumericTraits<AccumulateType>::ZeroValue();
     while(!inputIter.IsAtEnd())
       {
-      Value+=static_cast<AccumulateType>(inputIter.Get());
+      accumulator(inputIter.Get());
       ++inputIter;
       }
-    outputIter.Set (static_cast<OutputPixelType>(Value));
+    outputIter.Set(static_cast<OutputPixelType>(accumulator.GetValue()));
     progress.CompletedPixel();
     ++outputIter;
     }
 }
 
 
-template <class TInputImage, class TOutputImage >
+template <class TInputImage, class TOutputImage, class TAccumulator>
 void
-ProjectionImageFilter<TInputImage,TOutputImage>::
+ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>::
 PrintSelf(std::ostream& os, Indent indent) const
 {
   Superclass::PrintSelf(os,indent);

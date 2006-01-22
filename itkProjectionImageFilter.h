@@ -48,7 +48,7 @@ namespace itk
  *
  * \ingroup   IntensityImageFilters     Singlethreaded
  */
-template <class TInputImage, class TOutputImage>
+template <class TInputImage, class TOutputImage, class TAccumulator>
 class ITK_EXPORT ProjectionImageFilter : public ImageToImageFilter<TInputImage,TOutputImage>
 {
 public:
