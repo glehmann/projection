@@ -88,6 +88,114 @@ Other projections types can easily be created just by providing a new functor.
 AccumulateImageFilter is not modifiable to implement functor support without
 breaking the API.
 
+\section{Implemeting a new projection method}
+As an example, here is a filter which implement a square sum projection along a
+axe. This example may be useful in case of signed input type.
+
+Everything can be done in a single file, itkSquareSumProjectionImageFilter.h.
+\small \begin{verbatim}
+#ifndef __itkSquareSumProjectionImageFilter_h
+#define __itkSquareSumProjectionImageFilter_h
+\end{verbatim} \normalsize
+The itkProjectionImageFilter.h header must be included.
+\small \begin{verbatim}
+#include "itkProjectionImageFilter.h"
+#include "itkNumericTraits.h"
+
+namespace itk {
+
+namespace Function {
+\end{verbatim} \normalsize
+Now, create the class which do the real work: receive all the pixel values and
+give the result at the end. The class is created in the itk::Function names pace
+to avoid putting to much things in itk name space, and is templated over the
+type of the input and the output pixel.
+On object of this class is created for each pixel in the output image.
+\small \begin{verbatim}
+template <class TInputPixel, class TOuputPixel>
+class SquareSumAccumulator
+{
+public:
+\end{verbatim} \normalsize
+The constructor must take one parameter: the number of pixels to accumulate
+during the projection. In that case, this parameter is not useful, so it is not
+saved in an attribute of the class. The sum is initialized to zero.
+
+The destructor is empty - there is nothing to do.
+\small \begin{verbatim}
+  SquareSumAccumulator( unsigned long nb )
+    {
+    m_SquareSum = NumericTraits< TOuputPixel >::Zero;
+    }
+  ~SquareSumAccumulator(){}
+\end{verbatim} \normalsize
+The operator() is called for each pixel. In this method, the square sum is
+contructed, pixel after pixel. The method is declared inline for best
+performance.
+\small \begin{verbatim}
+  inline TInputPixel operator()( const TInputPixel &input )
+    {
+    m_SquareSum = m_SquareSum + ( input * input );
+    }
+\end{verbatim} \normalsize
+GetValue() is called to set the value of the result image. In that example, the
+sum is just return, but more complex computation can be done here (see the
+MedianProjectionImageFilter for an example). ProjectionImageFilter cast the
+output of this method to the output image's pixel type.
+\small \begin{verbatim}
+  inline TOuputPixel GetValue()
+    {
+    return m_SquareSum;
+    }
+\end{verbatim} \normalsize
+The internal attribute which accumulate the square sum.
+\small \begin{verbatim}
+  TOuputPixel m_SquareSum;
+};
+} // end namespace Function
+\end{verbatim} \normalsize
+The class is declared. It inherits from ProjectionImageFilter, and declares the
+usual types and methods.
+\small \begin{verbatim}
+template <class TInputImage, class TOutputImage>
+class ITK_EXPORT SquareSumProjectionImageFilter :
+    public
+    ProjectionImageFilter<TInputImage, TOutputImage,
+      Function::SquareSumAccumulator< typename TInputImage::PixelType,
+        typename TOutputImage::PixelType > >
+{
+public:
+  typedef SquareSumProjectionImageFilter Self;
+  typedef ProjectionImageFilter<TInputImage, TOutputImage, 
+    Function::SquareSumAccumulator< typename TInputImage::PixelType,
+      typename TOutputImage::PixelType > > Superclass;
+
+  typedef SmartPointer<Self>   Pointer;
+  typedef SmartPointer<const Self>  ConstPointer;
+
+  /** Runtime information support. */
+  itkTypeMacro(SquareSumProjectionImageFilter, ProjectionImageFilter);
+
+  /** Method for creation through the object factory. */
+  itkNewMacro(Self);
+
+
+protected:
+  SquareSumProjectionImageFilter() {}
+  virtual ~SquareSumProjectionImageFilter() {}
+
+private:
+  SquareSumProjectionImageFilter(const Self&); //purposely not implemented
+  void operator=(const Self&); //purposely not implemented
+
+
+}; // end SquareSumProjectionImageFilter
+
+} //end namespace itk
+#endif
+\end{verbatim} \normalsize
+That's all.
+
 \section{Performance}
 
 A timing test comparing performance on a $371 \times 371 \times 34$
@@ -117,7 +225,11 @@ AccumulateImageFilter, mean  & 0.617 s\\
 \end{table}
 
 \section{Examples}
-Figure~\ref{maximum0}, Figure~\ref{maximum1}, Figure~\ref{maximum}, Figure~\ref{minimum}, Figure~\ref{mean} and Figure~\ref{median} show the result of different projection on different axes. The result of SumProjectionImageFilter in similar to the result of MeanProjectionImageFilter, but with a higher range of values, and so is not shown here.
+Figure~\ref{maximum0}, Figure~\ref{maximum1}, Figure~\ref{maximum},
+Figure~\ref{minimum}, Figure~\ref{mean} and Figure~\ref{median} show the result
+of different projection on different axes. The result of
+SumProjectionImageFilter in similar to the result of MeanProjectionImageFilter,
+but with a higher range of values, and so is not shown here.
 
 \begin{figure}[htbp]
 \centering
@@ -224,7 +336,7 @@ int main(int, char * argv[])
 The new classes give more feature and more flexibility with equivalent
 performance than the current available filter, but loss the compatibility with
 the previous filter. I propose to mark AccumulateImageFilter as deprecated in
-the next release of ITK to incite user to the new class.
+the next release of ITK to incite ITK user to use the new class.
 
 
 \section{Acknowledgments}
