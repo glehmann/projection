@@ -15,13 +15,13 @@ namespace itk {
 
 
 namespace Function {
-template <class TInputPixel, class TOuputPixel>
+template <class TInputPixel, class TAccumulate>
 class MeanAccumulator
 {
 public:
   MeanAccumulator( unsigned long size )
     {
-    m_Sum = NumericTraits< TInputPixel >::Zero;
+    m_Sum = NumericTraits< TAccumulate >::Zero;
     m_Size = size;
     }
   ~MeanAccumulator(){}
@@ -31,27 +31,27 @@ public:
     m_Sum = m_Sum + input;
     }
 
-  inline TOuputPixel GetValue()
+  inline TAccumulate GetValue()
     {
-    return static_cast<TOuputPixel>( m_Sum / m_Size );
+    return m_Sum / m_Size;
     }
 
-  typename NumericTraits< TOuputPixel >::AccumulateType m_Sum;
+  TAccumulate m_Sum;
   unsigned long m_Size;
 };
 } // end namespace Function
 
 
-template <class TInputImage, class TOutputImage>
+template <class TInputImage, class TOutputImage, class TAccumulate=typename NumericTraits< typename TOutputImage::PixelType >::AccumulateType >
 class ITK_EXPORT MeanProjectionImageFilter :
     public
     ProjectionImageFilter<TInputImage, TOutputImage,
-      Function::MeanAccumulator< typename TInputImage::PixelType, typename TOutputImage::PixelType > >
+      Function::MeanAccumulator< typename TInputImage::PixelType, TAccumulate > >
 {
 public:
   typedef MeanProjectionImageFilter Self;
   typedef ProjectionImageFilter<TInputImage, TOutputImage, 
-    Function::MeanAccumulator< typename TInputImage::PixelType, typename TOutputImage::PixelType > > Superclass;
+    Function::MeanAccumulator< typename TInputImage::PixelType, TAccumulate > > Superclass;
 
   typedef SmartPointer<Self>   Pointer;
   typedef SmartPointer<const Self>  ConstPointer;
