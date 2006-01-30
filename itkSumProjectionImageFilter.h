@@ -21,7 +21,7 @@ class SumAccumulator
 public:
   SumAccumulator( unsigned long size )
     {
-    m_Sum = NumericTraits< TInputPixel >::Zero;
+    m_Sum = NumericTraits< TOuputPixel >::Zero;
     }
   ~SumAccumulator(){}
 
