@@ -19,7 +19,7 @@ template <class TInputPixel>
 class MinimumAccumulator
 {
 public:
-  MinimumAccumulator()
+  MinimumAccumulator( unsigned long size )
     {
     m_Minimum = NumericTraits< TInputPixel >::max();
     }

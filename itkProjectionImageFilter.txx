@@ -188,7 +188,7 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
   outputIter.GoToBegin();
   while(!outputIter.IsAtEnd())
     {
-    TAccumulator accumulator;
+    TAccumulator accumulator( SizeAxe );
     typename TOutputImage::IndexType OutputIndex = outputIter.GetIndex();
     for(unsigned int i=0; i<InputImageDimension; i++)
       {
@@ -204,7 +204,7 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
     AccumulatedRegion.SetIndex(AccumulatedIndex);
     inputIterType inputIter(inputImage, AccumulatedRegion);
     inputIter.GoToBegin();
-    AccumulateType Value=NumericTraits<AccumulateType>::ZeroValue();
+
     while(!inputIter.IsAtEnd())
       {
       accumulator(inputIter.Get());

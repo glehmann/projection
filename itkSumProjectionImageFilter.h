@@ -19,7 +19,7 @@ template <class TInputPixel, class TOuputPixel>
 class SumAccumulator
 {
 public:
-  SumAccumulator()
+  SumAccumulator( unsigned long size )
     {
     m_Sum = NumericTraits< TInputPixel >::Zero;
     }

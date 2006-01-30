@@ -19,26 +19,25 @@ template <class TInputPixel, class TOuputPixel>
 class MeanAccumulator
 {
 public:
-  MeanAccumulator()
+  MeanAccumulator( unsigned long size )
     {
     m_Sum = NumericTraits< TInputPixel >::Zero;
-    m_Count = 0;
+    m_Size = size;
     }
   ~MeanAccumulator(){}
 
   inline TInputPixel operator()( const TInputPixel &input )
     {
     m_Sum = m_Sum + input;
-    m_Count++;
     }
 
   inline TOuputPixel GetValue()
     {
-    return static_cast<TOuputPixel>( m_Sum / m_Count );
+    return static_cast<TOuputPixel>( m_Sum / m_Size );
     }
 
   typename NumericTraits< TOuputPixel >::AccumulateType m_Sum;
-  unsigned long m_Count;
+  unsigned long m_Size;
 };
 } // end namespace Function
 

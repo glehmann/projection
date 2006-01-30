@@ -21,7 +21,10 @@ template <class TInputPixel>
 class MedianAccumulator
 {
 public:
-  MedianAccumulator() {}
+  MedianAccumulator( unsigned long size )
+    {
+    m_Values.reserve( size );
+    }
   ~MedianAccumulator(){}
 
   inline TInputPixel operator()( const TInputPixel &input )
