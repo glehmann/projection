@@ -57,7 +57,7 @@ ${NAME}.ps: ${NAME}.dvi
 ${PDF_NAME}.pdf: ${NAME}.ps
 	ps2pdf -dMaxSubsetPct=100 -dCompatibilityLevel=1.3 \
          -dSubsetFonts=true -dEmbedAllFonts=true \
-         -dAutoFilterColorImages=false \
+         -dAutoFilterColorImages=false -dAutoFilterGrayImages=false \
          -dColorImageFilter=/FlateEncode -dGrayImageFilter=/FlateEncode \
 	 -dMonoImageFilter=/FlateEncode \
 	 ${NAME}.ps ${PDF_NAME}.pdf
@@ -69,10 +69,10 @@ ${NAME}.bbl: ${BIBS} ${NAME}.aux
 
 ${NAME}.dvi: ${NAME}.tex  ${BIBS}
 	$(MAKE) eps
-	latex -interaction=nonstopmode ${NAME}.tex
+	latex --interaction batchmode ${NAME}.tex
 	bibtex ${NAME}
-	latex -interaction=nonstopmode ${NAME}.tex
-	latex -interaction=nonstopmode ${NAME}.tex
+	latex --interaction batchmode ${NAME}.tex
+	latex --interaction batchmode ${NAME}.tex
 
 
 ${NAME}.aux: ${NAME}.tex  ${BIBS}
