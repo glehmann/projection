@@ -106,6 +106,8 @@ protected:
    *     ImageToImageFilter::GenerateData()  */
   void GenerateData(void);
 
+  virtual TAccumulator NewAccumulator( unsigned long );
+
 private:
   ProjectionImageFilter(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented

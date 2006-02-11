@@ -189,7 +189,7 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
   outputIter.GoToBegin();
   while(!outputIter.IsAtEnd())
     {
-    TAccumulator accumulator( SizeAxe );
+    TAccumulator accumulator = this->NewAccumulator( SizeAxe );
     typename TOutputImage::IndexType OutputIndex = outputIter.GetIndex();
     for(unsigned int i=0; i<InputImageDimension; i++)
       {
@@ -215,6 +215,15 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
     progress.CompletedPixel();
     ++outputIter;
     }
+}
+
+
+template <class TInputImage, class TOutputImage, class TAccumulator>
+TAccumulator
+ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>::
+NewAccumulator( unsigned long size )
+{
+  return TAccumulator( size );
 }
 
 
