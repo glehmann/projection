@@ -70,6 +70,7 @@ public:
   typedef typename     OutputImageType::RegionType OutputImageRegionType;
   typedef typename     OutputImageType::PixelType  OutputImagePixelType;
 
+  typedef TAccumulator AccumulatorType;
 
   /** ImageDimension enumeration */
   itkStaticConstMacro(InputImageDimension, unsigned int,
@@ -106,7 +107,7 @@ protected:
    *     ImageToImageFilter::GenerateData()  */
   void GenerateData(void);
 
-  virtual TAccumulator NewAccumulator( unsigned long );
+  virtual AccumulatorType NewAccumulator( unsigned long );
 
 private:
   ProjectionImageFilter(const Self&); //purposely not implemented
