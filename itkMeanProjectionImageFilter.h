@@ -23,10 +23,14 @@ public:
 
   MeanAccumulator( unsigned long size )
     {
-    m_Sum = NumericTraits< TAccumulate >::Zero;
     m_Size = size;
     }
   ~MeanAccumulator(){}
+
+  inline void Init()
+    {
+    m_Sum = NumericTraits< TAccumulate >::Zero;
+    }
 
   inline TInputPixel operator()( const TInputPixel &input, const TIndexType &index )
     {

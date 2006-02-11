@@ -23,11 +23,16 @@ public:
 
   SigmaAccumulator( unsigned long size )
     {
-    m_Sum = NumericTraits< TAccumulate >::Zero;
     m_Size = size;
     m_Values.reserve( size );
     }
   ~SigmaAccumulator(){}
+
+  inline void Init()
+    {
+    m_Sum = NumericTraits< TAccumulate >::Zero;
+    m_Values.clear();
+    }
 
   inline TInputPixel operator()( const TInputPixel &input, const TIndexType &index )
     {

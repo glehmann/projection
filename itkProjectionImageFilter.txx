@@ -185,11 +185,12 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
       AccumulatedSize[i] = 1;
       }
     }
+  AccumulatorType accumulator = this->NewAccumulator( SizeAxe );
   AccumulatedRegion.SetSize(AccumulatedSize);
   outputIter.GoToBegin();
   while(!outputIter.IsAtEnd())
     {
-    TAccumulator accumulator = this->NewAccumulator( SizeAxe );
+    accumulator.Init();
     typename TOutputImage::IndexType OutputIndex = outputIter.GetIndex();
     for(unsigned int i=0; i<InputImageDimension; i++)
       {

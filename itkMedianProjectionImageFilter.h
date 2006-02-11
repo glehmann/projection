@@ -27,6 +27,11 @@ public:
     }
   ~MedianAccumulator(){}
 
+  inline void Init()
+    {
+    m_Values.clear();
+    }
+
   inline TInputPixel operator()( const TInputPixel &input, const TIndexType &index )
     {
     m_Values.push_back( input );

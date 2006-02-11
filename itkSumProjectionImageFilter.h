@@ -19,11 +19,13 @@ template <class TInputPixel, class TOuputPixel, class TIndexType>
 class SumAccumulator
 {
 public:
-  SumAccumulator( unsigned long size )
+  SumAccumulator( unsigned long size ) {}
+  ~SumAccumulator(){}
+
+  inline void Init()
     {
     m_Sum = NumericTraits< TOuputPixel >::Zero;
     }
-  ~SumAccumulator(){}
 
   inline TInputPixel operator()( const TInputPixel &input, const TIndexType &index )
     {

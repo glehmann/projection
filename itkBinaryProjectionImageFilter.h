@@ -19,11 +19,13 @@ template <class TInputPixel, class TOutputPixel, class TIndexType>
 class BinaryAccumulator
 {
 public:
-  BinaryAccumulator( unsigned long size )
+  BinaryAccumulator( unsigned long size ) {}
+  ~BinaryAccumulator(){}
+
+  inline void Init()
     {
     m_IsForeground = false;
     }
-  ~BinaryAccumulator(){}
 
   inline TInputPixel operator()( const TInputPixel &input, const TIndexType &index )
     {

@@ -19,11 +19,13 @@ template <class TInputPixel, class TIndexType>
 class MinimumAccumulator
 {
 public:
-  MinimumAccumulator( unsigned long size )
+  MinimumAccumulator( unsigned long size ) {}
+  ~MinimumAccumulator(){}
+
+  inline void Init()
     {
     m_Minimum = NumericTraits< TInputPixel >::max();
     }
-  ~MinimumAccumulator(){}
 
   inline TInputPixel operator()( const TInputPixel &input, const TIndexType &index )
     {
