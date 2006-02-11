@@ -19,6 +19,8 @@ template <class TInputPixel, class TAccumulate>
 class MeanAccumulator
 {
 public:
+  typedef typename NumericTraits<TInputPixel>::RealType RealType;
+
   MeanAccumulator( unsigned long size )
     {
     m_Sum = NumericTraits< TAccumulate >::Zero;
@@ -31,9 +33,9 @@ public:
     m_Sum = m_Sum + input;
     }
 
-  inline TAccumulate GetValue()
+  inline RealType GetValue()
     {
-    return m_Sum / m_Size;
+    return ((RealType) m_Sum) / m_Size;
     }
 
   TAccumulate m_Sum;
