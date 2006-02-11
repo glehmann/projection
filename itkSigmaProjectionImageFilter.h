@@ -15,7 +15,7 @@ namespace itk {
 
 
 namespace Function {
-template <class TInputPixel, class TAccumulate>
+template <class TInputPixel, class TAccumulate, class TIndexType>
 class SigmaAccumulator
 {
 public:
@@ -29,7 +29,7 @@ public:
     }
   ~SigmaAccumulator(){}
 
-  inline TInputPixel operator()( const TInputPixel &input )
+  inline TInputPixel operator()( const TInputPixel &input, const TIndexType &index )
     {
     m_Sum = m_Sum + input;
     m_Values.push_back( input );
@@ -58,12 +58,12 @@ template <class TInputImage, class TOutputImage, class TAccumulate=typename Nume
 class ITK_EXPORT SigmaProjectionImageFilter :
     public
     ProjectionImageFilter<TInputImage, TOutputImage,
-      Function::SigmaAccumulator< typename TInputImage::PixelType, TAccumulate > >
+      Function::SigmaAccumulator< typename TInputImage::PixelType, TAccumulate, typename TInputImage::IndexType > >
 {
 public:
   typedef SigmaProjectionImageFilter Self;
   typedef ProjectionImageFilter<TInputImage, TOutputImage, 
-    Function::SigmaAccumulator< typename TInputImage::PixelType, TAccumulate > > Superclass;
+    Function::SigmaAccumulator< typename TInputImage::PixelType, TAccumulate, typename TInputImage::IndexType > > Superclass;
 
   typedef SmartPointer<Self>   Pointer;
   typedef SmartPointer<const Self>  ConstPointer;

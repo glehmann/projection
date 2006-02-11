@@ -15,7 +15,7 @@ namespace itk {
 
 
 namespace Function {
-template <class TInputPixel>
+template <class TInputPixel, class TIndexType>
 class MaximumAccumulator
 {
 public:
@@ -25,7 +25,7 @@ public:
     }
   ~MaximumAccumulator(){}
 
-  inline TInputPixel operator()( const TInputPixel &input )
+  inline TInputPixel operator()( const TInputPixel &input, const TIndexType &index )
     {
     m_Maximum = vnl_math_max( m_Maximum, input );
     }
@@ -43,11 +43,11 @@ public:
 template <class TInputImage, class TOutputImage>
 class ITK_EXPORT MaximumProjectionImageFilter :
     public
-    ProjectionImageFilter<TInputImage, TOutputImage, Function::MaximumAccumulator< typename TInputImage::PixelType > >
+    ProjectionImageFilter<TInputImage, TOutputImage, Function::MaximumAccumulator< typename TInputImage::PixelType, typename TInputImage::IndexType > >
 {
 public:
   typedef MaximumProjectionImageFilter Self;
-  typedef ProjectionImageFilter<TInputImage, TOutputImage, Function::MaximumAccumulator< typename TInputImage::PixelType > > Superclass;
+  typedef ProjectionImageFilter<TInputImage, TOutputImage, Function::MaximumAccumulator< typename TInputImage::PixelType, typename TInputImage::IndexType > > Superclass;
 
   typedef SmartPointer<Self>   Pointer;
   typedef SmartPointer<const Self>  ConstPointer;

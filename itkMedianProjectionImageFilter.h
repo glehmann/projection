@@ -17,7 +17,7 @@ namespace itk {
 
 
 namespace Function {
-template <class TInputPixel>
+template <class TInputPixel, class TIndexType>
 class MedianAccumulator
 {
 public:
@@ -27,7 +27,7 @@ public:
     }
   ~MedianAccumulator(){}
 
-  inline TInputPixel operator()( const TInputPixel &input )
+  inline TInputPixel operator()( const TInputPixel &input, const TIndexType &index )
     {
     m_Values.push_back( input );
     }
@@ -47,11 +47,11 @@ public:
 template <class TInputImage, class TOutputImage>
 class ITK_EXPORT MedianProjectionImageFilter :
     public
-    ProjectionImageFilter<TInputImage, TOutputImage, Function::MedianAccumulator< typename TInputImage::PixelType > >
+    ProjectionImageFilter<TInputImage, TOutputImage, Function::MedianAccumulator< typename TInputImage::PixelType, typename TInputImage::IndexType > >
 {
 public:
   typedef MedianProjectionImageFilter Self;
-  typedef ProjectionImageFilter<TInputImage, TOutputImage, Function::MedianAccumulator< typename TInputImage::PixelType > > Superclass;
+  typedef ProjectionImageFilter<TInputImage, TOutputImage, Function::MedianAccumulator< typename TInputImage::PixelType, typename TInputImage::IndexType > > Superclass;
 
   typedef SmartPointer<Self>   Pointer;
   typedef SmartPointer<const Self>  ConstPointer;

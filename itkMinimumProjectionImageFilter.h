@@ -15,7 +15,7 @@ namespace itk {
 
 
 namespace Function {
-template <class TInputPixel>
+template <class TInputPixel, class TIndexType>
 class MinimumAccumulator
 {
 public:
@@ -25,7 +25,7 @@ public:
     }
   ~MinimumAccumulator(){}
 
-  inline TInputPixel operator()( const TInputPixel &input )
+  inline TInputPixel operator()( const TInputPixel &input, const TIndexType &index )
     {
     m_Minimum = vnl_math_min( m_Minimum, input );
     }
@@ -43,11 +43,11 @@ public:
 template <class TInputImage, class TOutputImage>
 class ITK_EXPORT MinimumProjectionImageFilter :
     public
-    ProjectionImageFilter<TInputImage, TOutputImage, Function::MinimumAccumulator< typename TInputImage::PixelType > >
+    ProjectionImageFilter<TInputImage, TOutputImage, Function::MinimumAccumulator< typename TInputImage::PixelType, typename TInputImage::IndexType > >
 {
 public:
   typedef MinimumProjectionImageFilter Self;
-  typedef ProjectionImageFilter<TInputImage, TOutputImage, Function::MinimumAccumulator< typename TInputImage::PixelType > > Superclass;
+  typedef ProjectionImageFilter<TInputImage, TOutputImage, Function::MinimumAccumulator< typename TInputImage::PixelType, typename TInputImage::IndexType > > Superclass;
 
   typedef SmartPointer<Self>   Pointer;
   typedef SmartPointer<const Self>  ConstPointer;
