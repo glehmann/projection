@@ -20,6 +20,7 @@
 #include "itkProjectionImageFilter.h"
 #include "itkImageRegionIterator.h"
 #include "itkImageRegionConstIterator.h"
+#include "itkImageRegionConstIteratorWithIndex.h"
 #include "itkProgressReporter.h"
 
 
@@ -168,7 +169,7 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
 // and divide by the size of the accumulated dimension.
   typedef ImageRegionIterator<TOutputImage> outputIterType;
   outputIterType outputIter(outputImage, outputImage->GetBufferedRegion());
-  typedef ImageRegionConstIterator<TInputImage> inputIterType;
+  typedef ImageRegionConstIteratorWithIndex<TInputImage> inputIterType;
   
   typename TInputImage::RegionType AccumulatedRegion;
   typename TInputImage::SizeType AccumulatedSize = inputImage->GetLargestPossibleRegion().GetSize();
