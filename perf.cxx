@@ -6,6 +6,7 @@
 #include "itkMeanProjectionImageFilter.h"
 #include "itkMedianProjectionImageFilter.h"
 #include "itkSigmaProjectionImageFilter.h"
+#include "itkBinaryProjectionImageFilter.h"
 #include "itkAccumulateImageFilter.h"
 
 #include "itkTimeProbe.h"
@@ -52,6 +53,10 @@ int main(int, char * argv[])
   SigmaType::Pointer sigma = SigmaType::New();
   sigma->SetInput( reader->GetOutput() );
   
+  typedef itk::BinaryProjectionImageFilter< IType, LIType > BinaryType;
+  BinaryType::Pointer binary = BinaryType::New();
+  binary->SetInput( reader->GetOutput() );
+  
   typedef itk::AccumulateImageFilter< IType, LIType > AccType;
   AccType::Pointer accSum = AccType::New();
   accSum->SetInput( reader->GetOutput() );
@@ -71,6 +76,7 @@ int main(int, char * argv[])
             << "accMean" << "\t" 
             << "median" << "\t" 
             << "sigma" << "\t" 
+            << "binary" << "\t" 
             << std::endl;
 
     itk::TimeProbe maxtime;
@@ -81,6 +87,7 @@ int main(int, char * argv[])
     itk::TimeProbe sigmatime;
     itk::TimeProbe accMeantime;
     itk::TimeProbe mediantime;
+    itk::TimeProbe binarytime;
 
     for( int i=0; i<10; i++ )
       {
@@ -124,6 +131,11 @@ int main(int, char * argv[])
       sigmatime.Stop();
       sigma->Modified();
 
+      binarytime.Start();
+      binary->Update();
+      binarytime.Stop();
+      binary->Modified();
+
       }
       
     std::cout << std::setprecision(3)
@@ -135,6 +147,7 @@ int main(int, char * argv[])
               << accMeantime.GetMeanTime() << "\t" 
               << mediantime.GetMeanTime() << "\t" 
               << sigmatime.GetMeanTime() << "\t" 
+              << binarytime.GetMeanTime() << "\t" 
               <<std::endl;
   
   return 0;

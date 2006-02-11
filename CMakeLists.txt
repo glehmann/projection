@@ -3,6 +3,7 @@ PROJECT(projection)
 
 # set the name of the input image used to run the test
 SET(INPUT_IMAGE ${CMAKE_SOURCE_DIR}/images/ESCells.img)
+SET(BINARY_IMAGE ${CMAKE_SOURCE_DIR}/images/2th_ESCells.img)
 
 #include some macros from another file...
 INCLUDE(IJMacros.txt)
@@ -76,6 +77,10 @@ SET(CurrentExe "sigma")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 
+SET(CurrentExe "binary")
+ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
+TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
+
 SET(CurrentExe "accumulate")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
@@ -113,6 +118,12 @@ ADD_TEST(MedianCompareImage ${IMAGE_COMPARE} median.tif ${CMAKE_SOURCE_DIR}/imag
 
 ADD_TEST(Sigma sigma ${INPUT_IMAGE} sigma.tif)
 ADD_TEST(SigmaCompareImage ${IMAGE_COMPARE} sigma.tif ${CMAKE_SOURCE_DIR}/images/sigma.tif)
+
+ADD_TEST(Binary100 binary ${BINARY_IMAGE} binary100.tif 100 255)
+ADD_TEST(Binary100CompareImage ${IMAGE_COMPARE} binary100.tif ${CMAKE_SOURCE_DIR}/images/binary100.tif)
+
+ADD_TEST(Binary200 binary ${BINARY_IMAGE} binary200.tif 200 0)
+ADD_TEST(Binary200CompareImage ${IMAGE_COMPARE} binary200.tif ${CMAKE_SOURCE_DIR}/images/binary200.tif)
 
 
 # sum is not produced with the same output type and so can't be compared
