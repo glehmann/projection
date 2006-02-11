@@ -148,27 +148,24 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
 template <class TInputImage, class TOutputImage, class TAccumulator>
 void
 ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
-::GenerateData( void )
+::ThreadedGenerateData(const OutputImageRegionType& outputRegionForThread, int threadId )
 {
   if(m_Axe>=TInputImage::ImageDimension)
     {
     itkExceptionMacro(<<"ProjectionImageFilter: invalid dimension to accumulate. Axe = " << m_Axe);
     }
 
-  ProgressReporter progress(this, 0, this->GetOutput()->GetRequestedRegion().GetNumberOfPixels());
+  ProgressReporter progress(this, threadId, outputRegionForThread.GetNumberOfPixels());
 
   typedef typename TOutputImage::PixelType OutputPixelType;
   typedef typename NumericTraits<OutputPixelType>::AccumulateType AccumulateType;
   
   typename Superclass::InputImageConstPointer  inputImage = this->GetInput();
   typename TOutputImage::Pointer outputImage = this->GetOutput();
-  outputImage->SetBufferedRegion( outputImage->GetRequestedRegion() );
-  outputImage->Allocate();
 
 // Accumulate over the Nth dimension ( = m_Axe)
-// and divide by the size of the accumulated dimension.
   typedef ImageRegionIterator<TOutputImage> outputIterType;
-  outputIterType outputIter(outputImage, outputImage->GetBufferedRegion());
+  outputIterType outputIter(outputImage, outputRegionForThread);
   typedef ImageRegionConstIteratorWithIndex<TInputImage> inputIterType;
   
   typename TInputImage::RegionType AccumulatedRegion;
@@ -225,6 +222,65 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>::
 NewAccumulator( unsigned long size )
 {
   return TAccumulator( size );
+}
+
+
+template <class TInputImage, class TOutputImage, class TAccumulator>
+int 
+ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>::
+SplitRequestedRegion(int i, int num, OutputImageRegionType& splitRegion)
+{
+  // Get the output pointer
+  OutputImageType * outputPtr = this->GetOutput();
+  const typename TOutputImage::SizeType& requestedRegionSize 
+    = outputPtr->GetRequestedRegion().GetSize();
+
+  int splitAxis;
+  typename TOutputImage::IndexType splitIndex;
+  typename TOutputImage::SizeType splitSize;
+
+  // Initialize the splitRegion to the output requested region
+  splitRegion = outputPtr->GetRequestedRegion();
+  splitIndex = splitRegion.GetIndex();
+  splitSize = splitRegion.GetSize();
+
+  // split on the outermost dimension available
+  splitAxis = outputPtr->GetImageDimension() - 1;
+  while (requestedRegionSize[splitAxis] == 1 || splitAxis == m_Axe)
+    {
+    --splitAxis;
+    if (splitAxis < 0)
+      { // cannot split
+      itkDebugMacro("  Cannot Split");
+      return 1;
+      }
+    }
+
+  // determine the actual number of pieces that will be generated
+  typename TOutputImage::SizeType::SizeValueType range = requestedRegionSize[splitAxis];
+  int valuesPerThread = (int)::ceil(range/(double)num);
+  int maxThreadIdUsed = (int)::ceil(range/(double)valuesPerThread) - 1;
+
+  // Split the region
+  if (i < maxThreadIdUsed)
+    {
+    splitIndex[splitAxis] += i*valuesPerThread;
+    splitSize[splitAxis] = valuesPerThread;
+    }
+  if (i == maxThreadIdUsed)
+    {
+    splitIndex[splitAxis] += i*valuesPerThread;
+    // last thread needs to process the "rest" dimension being split
+    splitSize[splitAxis] = splitSize[splitAxis] - i*valuesPerThread;
+    }
+  
+  // set the split region ivars
+  splitRegion.SetIndex( splitIndex );
+  splitRegion.SetSize( splitSize );
+
+  itkDebugMacro("  Split Piece: " << splitRegion );
+
+  return maxThreadIdUsed + 1;
 }
 
 

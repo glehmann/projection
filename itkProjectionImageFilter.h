@@ -101,13 +101,11 @@ protected:
   /** Apply changes to the input image requested region. */
   virtual void GenerateInputRequestedRegion();
 
-  /** This method implements the actual accumulation of the image.
-   *
-   * \sa ImageToImageFilter::ThreadedGenerateData(),
-   *     ImageToImageFilter::GenerateData()  */
-  void GenerateData(void);
+  virtual void ThreadedGenerateData( const OutputImageRegionType& outputRegionForThread, int threadId );
 
   virtual AccumulatorType NewAccumulator( unsigned long );
+
+  virtual int SplitRequestedRegion( int i, int num, OutputImageRegionType& splitRegion );
 
 private:
   ProjectionImageFilter(const Self&); //purposely not implemented

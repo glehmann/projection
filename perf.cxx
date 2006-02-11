@@ -16,8 +16,6 @@
 
 int main(int, char * argv[])
 {
-  itk::MultiThreader::SetGlobalMaximumNumberOfThreads(1);
-
   const int dim = 3;
   typedef unsigned char PType;
   typedef itk::Image< PType, dim >    IType;
@@ -68,7 +66,8 @@ int main(int, char * argv[])
   reader->Update();
   
   
-  std::cout << "#max" << "\t" 
+  std::cout << "#th" << "\t" 
+            << "#max" << "\t" 
             << "min" << "\t" 
             << "sum" << "\t" 
             << "accSum" << "\t" 
@@ -79,76 +78,90 @@ int main(int, char * argv[])
             << "binary" << "\t" 
             << std::endl;
 
-    itk::TimeProbe maxtime;
-    itk::TimeProbe mintime;
-    itk::TimeProbe sumtime;
-    itk::TimeProbe accSumtime;
-    itk::TimeProbe meantime;
-    itk::TimeProbe sigmatime;
-    itk::TimeProbe accMeantime;
-    itk::TimeProbe mediantime;
-    itk::TimeProbe binarytime;
-
-    for( int i=0; i<10; i++ )
+    for( int th=1; th<=8; th++ )
       {
-      maxtime.Start();
-      max->Update();
-      maxtime.Stop();
-      max->Modified();
+      itk::TimeProbe maxtime;
+      itk::TimeProbe mintime;
+      itk::TimeProbe sumtime;
+      itk::TimeProbe accSumtime;
+      itk::TimeProbe meantime;
+      itk::TimeProbe sigmatime;
+      itk::TimeProbe accMeantime;
+      itk::TimeProbe mediantime;
+      itk::TimeProbe binarytime;
 
-      mintime.Start();
-      min->Update();
-      mintime.Stop();
-      min->Modified();
+      max->SetNumberOfThreads( th );
+      min->SetNumberOfThreads( th );
+      sum->SetNumberOfThreads( th );
+      mean->SetNumberOfThreads( th );
+      accSum->SetNumberOfThreads( th );
+      accMean->SetNumberOfThreads( th );
+      median->SetNumberOfThreads( th );
+      sigma->SetNumberOfThreads( th );
+      binary->SetNumberOfThreads( th );
 
-      sumtime.Start();
-      sum->Update();
-      sumtime.Stop();
-      sum->Modified();
-
-      accSumtime.Start();
-      accSum->Update();
-      accSumtime.Stop();
-      accSum->Modified();
-
-      meantime.Start();
-      mean->Update();
-      meantime.Stop();
-      mean->Modified();
-
-      accMeantime.Start();
-      accMean->Update();
-      accMeantime.Stop();
-      accMean->Modified();
-
-      mediantime.Start();
-      median->Update();
-      mediantime.Stop();
-      median->Modified();
-
-      sigmatime.Start();
-      sigma->Update();
-      sigmatime.Stop();
-      sigma->Modified();
-
-      binarytime.Start();
-      binary->Update();
-      binarytime.Stop();
-      binary->Modified();
-
+      for( int i=0; i<10; i++ )
+        {
+        maxtime.Start();
+        max->Update();
+        maxtime.Stop();
+        max->Modified();
+  
+        mintime.Start();
+        min->Update();
+        mintime.Stop();
+        min->Modified();
+  
+        sumtime.Start();
+        sum->Update();
+        sumtime.Stop();
+        sum->Modified();
+  
+        accSumtime.Start();
+        accSum->Update();
+        accSumtime.Stop();
+        accSum->Modified();
+  
+        meantime.Start();
+        mean->Update();
+        meantime.Stop();
+        mean->Modified();
+  
+        accMeantime.Start();
+        accMean->Update();
+        accMeantime.Stop();
+        accMean->Modified();
+  
+        mediantime.Start();
+        median->Update();
+        mediantime.Stop();
+        median->Modified();
+  
+        sigmatime.Start();
+        sigma->Update();
+        sigmatime.Stop();
+        sigma->Modified();
+  
+        binarytime.Start();
+        binary->Update();
+        binarytime.Stop();
+        binary->Modified();
+  
+        }
+        
+      std::cout << std::setprecision(3)
+                << th << "\t" 
+                << maxtime.GetMeanTime() << "\t" 
+                << mintime.GetMeanTime() << "\t" 
+                << sumtime.GetMeanTime() << "\t" 
+                << accSumtime.GetMeanTime() << "\t" 
+                << meantime.GetMeanTime() << "\t" 
+                << accMeantime.GetMeanTime() << "\t" 
+                << mediantime.GetMeanTime() << "\t" 
+                << sigmatime.GetMeanTime() << "\t" 
+                << binarytime.GetMeanTime() << "\t" 
+                <<std::endl;
       }
-      
-    std::cout << std::setprecision(3)
-              << maxtime.GetMeanTime() << "\t" 
-              << mintime.GetMeanTime() << "\t" 
-              << sumtime.GetMeanTime() << "\t" 
-              << accSumtime.GetMeanTime() << "\t" 
-              << meantime.GetMeanTime() << "\t" 
-              << accMeantime.GetMeanTime() << "\t" 
-              << mediantime.GetMeanTime() << "\t" 
-              << sigmatime.GetMeanTime() << "\t" 
-              << binarytime.GetMeanTime() << "\t" 
-              <<std::endl;
   
   return 0;
 }
