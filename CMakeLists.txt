@@ -72,6 +72,10 @@ SET(CurrentExe "median")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 
+SET(CurrentExe "sigma")
+ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
+TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
+
 SET(CurrentExe "accumulate")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
@@ -106,6 +110,9 @@ ADD_TEST(MeanCompareImage ${IMAGE_COMPARE} mean.tif ${CMAKE_SOURCE_DIR}/images/m
 
 ADD_TEST(Median median ${INPUT_IMAGE} median.tif)
 ADD_TEST(MedianCompareImage ${IMAGE_COMPARE} median.tif ${CMAKE_SOURCE_DIR}/images/median.tif)
+
+ADD_TEST(Sigma sigma ${INPUT_IMAGE} sigma.tif)
+ADD_TEST(SigmaCompareImage ${IMAGE_COMPARE} sigma.tif ${CMAKE_SOURCE_DIR}/images/sigma.tif)
 
 
 # sum is not produced with the same output type and so can't be compared
