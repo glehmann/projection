@@ -33,7 +33,7 @@ colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 
 % The title should be descriptive enough for people to be able to find
 % the relevant document. 
-\title{Image projections along an axe}
+\title{Image projections along an axis}
 
 % Increment the release number whenever significant changes are made.
 % The author and/or editor can define 'significant' however they like.
@@ -64,33 +64,43 @@ implement different projection methods.
 \section{Introduction}
 ITK already provide a class to project an image along an axe:
 \doxygen{AccumulateImageFilter}. However, this class is limited to sum
-projection and mean projection.
+and mean projections.
 
 
 \section{Implementation}
 
-The base class, ProjectionImageFilter, is mainly a copy of
-AccumulateImageFilter, with some enhancement:
+The base class, \verb$ProjectionImageFilter$, is mainly a copy of
+\verb$AccumulateImageFilter$, with some enhancement:
 \begin{itemize}
   \item projection is delegated to a functor
   \item report its progress
+  \item thread support
 \end{itemize}
 Different projection types are provided, with specialized classes:
 \begin{itemize}
-  \item maximum projection (MaximumProjectionImageFilter)
-  \item minimum projection (MinimumProjectionImageFilter)
-  \item mean projection (MeanProjectionImageFilter)
-  \item median projection (MedianProjectionImageFilter)
-  \item sum projection (SumProjectionImageFilter)
+  \item maximum projection (\verb$MaximumProjectionImageFilter$)
+  \item minimum projection (\verb$MinimumProjectionImageFilter$)
+  \item mean projection (\verb$MeanProjectionImageFilter$)
+  \item median projection (\verb$MedianProjectionImageFilter$)
+  \item sum projection (\verb$SumProjectionImageFilter$)
+  \item sigma projection (\verb$SigmaProjectionImageFilter$)
+  \item binary projection (\verb$BinaryProjectionImageFilter$)
 \end{itemize}
 Other projections types can easily be created just by providing a new functor.
+
+The projection can be easily threaded by splitting the required region. The
+Only important thing is to take care to not split the region on the projection
+dimension. 
+The default split done by \verb$ImageSource$ if fully usable without any changes
+because it is done on the output region, and that region have a size of 1 on
+the projection dimension, so the split will be done on anothe dimesion.
 
 AccumulateImageFilter is not modifiable to implement functor support without
 breaking the API.
 
 \section{Implemeting a new projection method}
 As an example, here is a filter which implement a square sum projection along a
-axe. This example may be useful in case of signed input type.
+axis. This example may be useful in case of signed input type.
 
 Everything can be done in a single file, itkSquareSumProjectionImageFilter.h.
 \small \begin{verbatim}
@@ -107,10 +117,10 @@ namespace itk {
 namespace Function {
 \end{verbatim} \normalsize
 Now, create the class which do the real work: receive all the pixel values and
-give the result at the end. The class is created in the itk::Function names pace
-to avoid putting to much things in itk name space, and is templated over the
+give the result at the end. The class is created in the \verb$itk::Function$ names pace
+to avoid putting too much things in itk name space, and is templated over the
 type of the input and the output pixel.
-On object of this class is created for each pixel in the output image.
+One object of this class is created for each thread.
 \small \begin{verbatim}
 template <class TInputPixel, class TOuputPixel>
 class SquareSumAccumulator
@@ -119,28 +129,37 @@ public:
 \end{verbatim} \normalsize
 The constructor must take one parameter: the number of pixels to accumulate
 during the projection. In that case, this parameter is not useful, so it is not
-saved in an attribute of the class. The sum is initialized to zero.
+saved in an attribute of the class.
+
+If some custom parameters need to be passed to the accumulator, the \verb$NewAccumulator()$
+method can be overloaded. See \verb$BinaryProjectionImageFilter$'s code for an
+example.
 
 The destructor is empty - there is nothing to do.
 \small \begin{verbatim}
-  SquareSumAccumulator( unsigned long nb )
+  SquareSumAccumulator( unsigned long size ) {}
+  ~SquareSumAccumulator(){}
+\end{verbatim} \normalsize
+\verb$Init()$ is called before accumulating a new set of pixel
+to initialize the accumulator. Here, the sum is initialized to zero.
+\small \begin{verbatim}
+  void Init()
     {
     m_SquareSum = NumericTraits< TOuputPixel >::Zero;
     }
-  ~SquareSumAccumulator(){}
 \end{verbatim} \normalsize
-The operator() is called for each pixel. In this method, the square sum is
+The \verb$operator()$ is called for all pixels. In this method, the square sum is
 contructed, pixel after pixel. The method is declared inline for best
 performance.
 \small \begin{verbatim}
-  inline TInputPixel operator()( const TInputPixel &input )
+  inline TOuputPixel operator()( const TInputPixel &input )
     {
-    m_SquareSum = m_SquareSum + ( input * input );
+    m_SquareSum = m_SquareSum + vnl_math_sqr( (TOuputPixel) input );
     }
 \end{verbatim} \normalsize
-GetValue() is called to set the value of the result image. In that example, the
-sum is just return, but more complex computation can be done here (see the
-MedianProjectionImageFilter for an example). ProjectionImageFilter cast the
+\verb$GetValue()$ is called to set the value of the result image. In that example, the
+sum is just returned, but more complex computations can be done here (see the
+\verb$MedianProjectionImageFilter$'s code for an example). \verb$ProjectionImageFilter$ cast the
 output of this method to the output image's pixel type.
 \small \begin{verbatim}
   inline TOuputPixel GetValue()
@@ -226,7 +245,8 @@ AccumulateImageFilter, mean  & 0.617 s\\
 
 \section{Examples}
 Figure~\ref{maximum0}, Figure~\ref{maximum1}, Figure~\ref{maximum},
-Figure~\ref{minimum}, Figure~\ref{mean} and Figure~\ref{median} show the result
+Figure~\ref{minimum}, Figure~\ref{mean}, Figure~\ref{median},
+Figure~\ref{sigma} and Figure~\ref{binary100} show the result
 of different projection on different axes. The result of
 SumProjectionImageFilter in similar to the result of MeanProjectionImageFilter,
 but with a higher range of values, and so is not shown here.
@@ -234,51 +254,54 @@ but with a higher range of values, and so is not shown here.
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.5]{maximum0}
-\caption{MaximumProjectionImageFilter, projection along axe x.\label{maximum0}}
+\caption{MaximumProjectionImageFilter, projection along axis x.\label{maximum0}}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.5]{maximum1}
-\caption{MaximumProjectionImageFilter, projection along axe y.\label{maximum1}}
+\caption{MaximumProjectionImageFilter, projection along axis y.\label{maximum1}}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.75]{maximum}
-\caption{MaximumProjectionImageFilter, projection along axe z.\label{maximum}}
+\caption{MaximumProjectionImageFilter, projection along axis z.\label{maximum}}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.75]{minimum}
-\caption{MinimumProjectionImageFilter, projection along axe z.\label{minimum}}
+\caption{MinimumProjectionImageFilter, projection along axis z.\label{minimum}}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.75]{mean}
-\caption{MeanProjectionImageFilter, projection along axe z.\label{mean}}
+\caption{MeanProjectionImageFilter, projection along axis z.\label{mean}}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.75]{median}
-\caption{MedianProjectionImageFilter, projection along axe z\label{median}}
+\caption{MedianProjectionImageFilter, projection along axis z\label{median}}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.75]{sigma}
-\caption{SigmaProjectionImageFilter, projection along axe z\label{median}}
+\caption{SigmaProjectionImageFilter, projection along axis z\label{sigma}}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.75]{binary100}
+\caption{BinaryProjectionImageFilter, projection along axis z, with foreground value = 100, and background value = 255\label{binary100}}
 \end{figure}
 
 \section{Sample code}
 
 \small \begin{verbatim}
-#include "itkImageFileReader.h"
-#include "itkImageFileWriter.h"
-#include "itkCommand.h"
 #include "itkSimpleFilterWatcher.h"
 
 #include "itkMaximumProjectionImageFilter.h"
@@ -287,7 +310,7 @@ but with a higher range of values, and so is not shown here.
 
 int main(int, char * argv[])
 {
-  int axe = atoi(argv[1]);
+  int dim = atoi(argv[1]);
 
   typedef unsigned char PType;
   typedef itk::Image< PType, 3 > IType;
@@ -300,7 +323,10 @@ int main(int, char * argv[])
   typedef itk::MaximumProjectionImageFilter< IType, IType > FilterType;
   FilterType::Pointer filter = FilterType::New();
   filter->SetInput( reader->GetOutput() );
-  filter->SetAxe( axe );
+  filter->SetProjectionDimension( dim );
+  // to be sure that the result is ok with several threads, even on a single
+  // proc computer
+  filter->SetNumberOfThreads( 2 );
 
   itk::SimpleFilterWatcher watcher(filter, "filter");
 
@@ -314,7 +340,7 @@ int main(int, char * argv[])
 
   IType::SizeType size;
   for(int i=0; i<=3; i++) {
-    if(i == axe) {
+    if(i == dim) {
       size[i] = 0;
     } else {
       size[i] = inputSize[i];
@@ -327,6 +353,12 @@ int main(int, char * argv[])
   region.SetSize( size );
   region.SetIndex( idx );
   extract->SetExtractionRegion( region );
+
+  std::cout << "size: " << size << std::endl;
+  std::cout << "index: " << idx << std::endl;
+
+  extract->Update();
+  std::cout << "output size: " << extract->GetOutput()->GetLargestPossibleRegion().GetSize() << std::endl;
 
   typedef itk::ImageFileWriter< IType2 > WriterType;
   WriterType::Pointer writer = WriterType::New();

@@ -1,6 +1,6 @@
 
 # you should use the title of the article instead
-ARTICLE_TITLE = Image projections along an axe
+ARTICLE_TITLE = Image projections along an axis
 
 # spaces are not allowed
 empty:=
