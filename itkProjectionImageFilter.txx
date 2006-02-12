@@ -206,7 +206,7 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
 
     while(!inputIter.IsAtEnd())
       {
-      accumulator(inputIter.Get(), inputIter.GetIndex());
+      accumulator(inputIter.Get());
       ++inputIter;
       }
     outputIter.Set(static_cast<OutputPixelType>(accumulator.GetValue()));

@@ -15,7 +15,7 @@ namespace itk {
 
 
 namespace Function {
-template <class TInputPixel, class TOutputPixel, class TIndexType>
+template <class TInputPixel, class TOutputPixel>
 class BinaryAccumulator
 {
 public:
@@ -27,7 +27,7 @@ public:
     m_IsForeground = false;
     }
 
-  inline TInputPixel operator()( const TInputPixel &input, const TIndexType &index )
+  inline TInputPixel operator()( const TInputPixel &input )
     {
     if( input == m_ForegroundValue )
       { m_IsForeground = true; }
@@ -53,11 +53,11 @@ public:
 template <class TInputImage, class TOutputImage>
 class ITK_EXPORT BinaryProjectionImageFilter :
     public
-    ProjectionImageFilter<TInputImage, TOutputImage, Function::BinaryAccumulator< typename TInputImage::PixelType, typename TOutputImage::PixelType, typename TInputImage::IndexType > >
+    ProjectionImageFilter<TInputImage, TOutputImage, Function::BinaryAccumulator< typename TInputImage::PixelType, typename TOutputImage::PixelType > >
 {
 public:
   typedef BinaryProjectionImageFilter Self;
-  typedef ProjectionImageFilter<TInputImage, TOutputImage, Function::BinaryAccumulator< typename TInputImage::PixelType, typename TOutputImage::PixelType, typename TInputImage::IndexType > > Superclass;
+  typedef ProjectionImageFilter<TInputImage, TOutputImage, Function::BinaryAccumulator< typename TInputImage::PixelType, typename TOutputImage::PixelType > > Superclass;
 
   typedef SmartPointer<Self>   Pointer;
   typedef SmartPointer<const Self>  ConstPointer;
