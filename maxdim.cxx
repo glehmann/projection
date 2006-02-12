@@ -9,7 +9,7 @@
 
 int main(int, char * argv[])
 {
-  int axe = atoi(argv[1]);
+  int dim = atoi(argv[1]);
 
   typedef unsigned char PType;
   typedef itk::Image< PType, 3 > IType;
@@ -22,7 +22,7 @@ int main(int, char * argv[])
   typedef itk::MaximumProjectionImageFilter< IType, IType > FilterType;
   FilterType::Pointer filter = FilterType::New();
   filter->SetInput( reader->GetOutput() );
-  filter->SetAxe( axe );
+  filter->SetProjectionDimension( dim );
 
   itk::SimpleFilterWatcher watcher(filter, "filter");
 
@@ -36,7 +36,7 @@ int main(int, char * argv[])
 
   IType::SizeType size;
   for(int i=0; i<=3; i++) {
-    if(i == axe) {
+    if(i == dim) {
       size[i] = 0;
     } else {
       size[i] = inputSize[i];

@@ -28,7 +28,7 @@ namespace itk
  *
  *    This class accumulates an image along a dimension and reduce the size 
  * of this dimension to 1. The dimension being accumulated is set by 
- * Axe. 
+ * ProjectionDimension. 
  *
  *   Each pixel is the cumulative sum of the pixels along the collapsed
  * dimension and reduce the size of the accumulated dimension to 1 (only 
@@ -86,8 +86,8 @@ public:
   /** Set the direction in which to accumulate the data.  It must be
    * set before the update of the filter. Defaults to the last
    * dimension. */
-  itkGetMacro( Axe, unsigned int );
-  itkSetMacro( Axe, unsigned int );
+  itkGetMacro( ProjectionDimension, unsigned int );
+  itkSetMacro( ProjectionDimension, unsigned int );
 
 
 protected:
@@ -111,7 +111,7 @@ private:
   ProjectionImageFilter(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented
 
-  unsigned int m_Axe;
+  unsigned int m_ProjectionDimension;
 
 };
 

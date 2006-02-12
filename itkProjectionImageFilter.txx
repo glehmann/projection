@@ -35,7 +35,7 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
 ::ProjectionImageFilter()
 {
   this->SetNumberOfRequiredInputs( 1 );
-  m_Axe=InputImageDimension-1;
+  m_ProjectionDimension=InputImageDimension-1;
 }
 
 
@@ -69,7 +69,7 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
   // Reduce the size of the accumulated dimension.
   for(unsigned int i = 0; i<InputImageDimension; i++)
     {
-    if (i != m_Axe)
+    if (i != m_ProjectionDimension)
       {
       outputSize[i]  = inputSize[i];
       outputIndex[i] = inputIndex[i];
@@ -120,7 +120,7 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
 
     for(unsigned int i=0; i<TInputImage::ImageDimension; i++)
       {
-      if(i!=m_Axe)
+      if(i!=m_ProjectionDimension)
         {
         inputSize[i] = outputSize[i];
         inputIndex[i] = outputIndex[i];
@@ -150,9 +150,9 @@ void
 ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
 ::ThreadedGenerateData(const OutputImageRegionType& outputRegionForThread, int threadId )
 {
-  if(m_Axe>=TInputImage::ImageDimension)
+  if(m_ProjectionDimension>=TInputImage::ImageDimension)
     {
-    itkExceptionMacro(<<"ProjectionImageFilter: invalid dimension to accumulate. Axe = " << m_Axe);
+    itkExceptionMacro(<<"ProjectionImageFilter: invalid dimension to accumulate. ProjectionDimension = " << m_ProjectionDimension);
     }
 
   ProgressReporter progress(this, threadId, outputRegionForThread.GetNumberOfPixels());
@@ -163,7 +163,7 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
   typename Superclass::InputImageConstPointer  inputImage = this->GetInput();
   typename TOutputImage::Pointer outputImage = this->GetOutput();
 
-// Accumulate over the Nth dimension ( = m_Axe)
+// Accumulate over the Nth dimension ( = m_ProjectionDimension)
   typedef ImageRegionIterator<TOutputImage> outputIterType;
   outputIterType outputIter(outputImage, outputRegionForThread);
   typedef ImageRegionConstIteratorWithIndex<TInputImage> inputIterType;
@@ -172,17 +172,17 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
   typename TInputImage::SizeType AccumulatedSize = inputImage->GetLargestPossibleRegion().GetSize();
   typename TInputImage::IndexType AccumulatedIndex = inputImage->GetLargestPossibleRegion().GetIndex();
 
-  unsigned long SizeAxe = AccumulatedSize[m_Axe];
-  double SizeAxeDouble = static_cast<double>(SizeAxe);
-  long IndexAxe = AccumulatedIndex[m_Axe];
+  unsigned long SizeProjectionDimension = AccumulatedSize[m_ProjectionDimension];
+  double SizeProjectionDimensionDouble = static_cast<double>(SizeProjectionDimension);
+  long IndexProjectionDimension = AccumulatedIndex[m_ProjectionDimension];
   for(unsigned int i=0; i< InputImageDimension; i++)
     {
-    if (i != m_Axe )
+    if (i != m_ProjectionDimension )
       {
       AccumulatedSize[i] = 1;
       }
     }
-  AccumulatorType accumulator = this->NewAccumulator( SizeAxe );
+  AccumulatorType accumulator = this->NewAccumulator( SizeProjectionDimension );
   AccumulatedRegion.SetSize(AccumulatedSize);
   outputIter.GoToBegin();
   while(!outputIter.IsAtEnd())
@@ -191,13 +191,13 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
     typename TOutputImage::IndexType OutputIndex = outputIter.GetIndex();
     for(unsigned int i=0; i<InputImageDimension; i++)
       {
-      if (i != m_Axe)
+      if (i != m_ProjectionDimension)
         {
         AccumulatedIndex[i] = OutputIndex[i];
         }
       else
         {
-        AccumulatedIndex[i] = IndexAxe;
+        AccumulatedIndex[i] = IndexProjectionDimension;
         }
       }
     AccumulatedRegion.SetIndex(AccumulatedIndex);
@@ -246,7 +246,7 @@ SplitRequestedRegion(int i, int num, OutputImageRegionType& splitRegion)
 
   // split on the outermost dimension available
   splitAxis = outputPtr->GetImageDimension() - 1;
-  while (requestedRegionSize[splitAxis] == 1 || splitAxis == m_Axe)
+  while (requestedRegionSize[splitAxis] == 1 || splitAxis == m_ProjectionDimension)
     {
     --splitAxis;
     if (splitAxis < 0)
@@ -291,7 +291,7 @@ PrintSelf(std::ostream& os, Indent indent) const
 {
   Superclass::PrintSelf(os,indent);
 
-  os << indent << "Axe: " << m_Axe << std::endl;
+  os << indent << "ProjectionDimension: " << m_ProjectionDimension << std::endl;
 }
 
 

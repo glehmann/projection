@@ -89,7 +89,7 @@ SET(CurrentExe "perf")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 
-SET(CurrentExe "maxaxe")
+SET(CurrentExe "maxdim")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 
@@ -134,11 +134,11 @@ ADD_TEST(AccumulateMean accumulate 1 ${INPUT_IMAGE} accumulate-mean.tif)
 ADD_TEST(AccumulateMeanCompareImage ${IMAGE_COMPARE} accumulate-mean.tif ${CMAKE_SOURCE_DIR}/images/mean.tif)
 
 
-ADD_TEST(Maximum0 maxaxe 0 ${INPUT_IMAGE} maximum0.tif)
+ADD_TEST(Maximum0 maxdim 0 ${INPUT_IMAGE} maximum0.tif)
 ADD_TEST(Maximum0CompareImage ${IMAGE_COMPARE} maximum0.tif ${CMAKE_SOURCE_DIR}/images/maximum0.tif)
 
-ADD_TEST(Maximum1 maxaxe 1 ${INPUT_IMAGE} maximum1.tif)
+ADD_TEST(Maximum1 maxdim 1 ${INPUT_IMAGE} maximum1.tif)
 ADD_TEST(Maximum1CompareImage ${IMAGE_COMPARE} maximum1.tif ${CMAKE_SOURCE_DIR}/images/maximum1.tif)
 
-ADD_TEST(Maximum2 maxaxe 2 ${INPUT_IMAGE} maximum2.tif)
+ADD_TEST(Maximum2 maxdim 2 ${INPUT_IMAGE} maximum2.tif)
 ADD_TEST(Maximum2CompareImage ${IMAGE_COMPARE} maximum2.tif ${CMAKE_SOURCE_DIR}/images/maximum.tif)
