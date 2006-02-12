@@ -23,6 +23,9 @@ int main(int, char * argv[])
   FilterType::Pointer filter = FilterType::New();
   filter->SetInput( reader->GetOutput() );
   filter->SetProjectionDimension( dim );
+  // to be sure that the result is ok with several threads, even on a single
+  // proc computer
+  filter->SetNumberOfThreads( 2 );
 
   itk::SimpleFilterWatcher watcher(filter, "filter");
 

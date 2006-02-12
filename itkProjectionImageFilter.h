@@ -105,8 +105,6 @@ protected:
 
   virtual AccumulatorType NewAccumulator( unsigned long );
 
-  virtual int SplitRequestedRegion( int i, int num, OutputImageRegionType& splitRegion );
-
 private:
   ProjectionImageFilter(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented
