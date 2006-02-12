@@ -42,6 +42,10 @@ public:
 
   inline RealType GetValue()
     {
+    // to avoid division by zero
+    if( m_Size <= 1 )
+      return NumericTraits<RealType>::Zero;
+
     typename NumericTraits<TInputPixel>::RealType mean = ((RealType) m_Sum) / m_Size;
     typename std::vector<TInputPixel>::iterator it;
     RealType squaredSum = NumericTraits<RealType>::Zero;
