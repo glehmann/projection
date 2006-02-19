@@ -62,7 +62,7 @@ implement different projection methods.
 % \tableofcontents
 
 \section{Introduction}
-ITK already provide a class to project an image along an axe:
+ITK already provide a class to project an image along an axis:
 \doxygen{AccumulateImageFilter}. However, this class is limited to sum
 and mean projections.
 
@@ -89,25 +89,27 @@ Different projection types are provided, with specialized classes:
 Other projections types can easily be created just by providing a new functor.
 
 The projection can be easily threaded by splitting the required region. The
-Only important thing is to take care to not split the region on the projection
-dimension. 
+only important thing is to take care to not split the region on the projected
+dimension.
 The default split done by \verb$ImageSource$ if fully usable without any changes
 because it is done on the output region, and that region have a size of 1 on
-the projection dimension, so the split will be done on anothe dimesion.
+the projected dimension, so the split will be done on another dimension.
 
-AccumulateImageFilter is not modifiable to implement functor support without
-breaking the API.
+\verb$AccumulateImageFilter$ is not modifiable to implement functor support without
+breaking the API. However, \verb$AccumulateImageFilter$ can be implemented as a
+sub-class of \verb$ProjectionImageFilter$ to benefit of the thread support, and to
+avoid duplication of code.
 
-\section{Implemeting a new projection method}
+\section{Implementing a new projection method}
 As an example, here is a filter which implement a square sum projection along a
 axis. This example may be useful in case of signed input type.
 
-Everything can be done in a single file, itkSquareSumProjectionImageFilter.h.
+Everything can be done in a single file, \verb$itkSquareSumProjectionImageFilter.h$.
 \small \begin{verbatim}
 #ifndef __itkSquareSumProjectionImageFilter_h
 #define __itkSquareSumProjectionImageFilter_h
 \end{verbatim} \normalsize
-The itkProjectionImageFilter.h header must be included.
+The \verb$itkProjectionImageFilter.h$ header must be included.
 \small \begin{verbatim}
 #include "itkProjectionImageFilter.h"
 #include "itkNumericTraits.h"
@@ -117,8 +119,8 @@ namespace itk {
 namespace Function {
 \end{verbatim} \normalsize
 Now, create the class which do the real work: receive all the pixel values and
-give the result at the end. The class is created in the \verb$itk::Function$ names pace
-to avoid putting too much things in itk name space, and is templated over the
+give the result at the end. The class is created in the \verb$itk::Function$ name space
+to avoid putting too much things in the \verb$itk$ name space, and is templated over the
 type of the input and the output pixel.
 One object of this class is created for each thread.
 \small \begin{verbatim}
@@ -140,7 +142,7 @@ The destructor is empty - there is nothing to do.
   SquareSumAccumulator( unsigned long size ) {}
   ~SquareSumAccumulator(){}
 \end{verbatim} \normalsize
-\verb$Init()$ is called before accumulating a new set of pixel
+\verb$Init()$ is called before accumulating a new set of pixels
 to initialize the accumulator. Here, the sum is initialized to zero.
 \small \begin{verbatim}
   void Init()
@@ -149,7 +151,7 @@ to initialize the accumulator. Here, the sum is initialized to zero.
     }
 \end{verbatim} \normalsize
 The \verb$operator()$ is called for all pixels. In this method, the square sum is
-contructed, pixel after pixel. The method is declared inline for best
+constructed, pixel after pixel. The method is declared \verb$inline$ for best
 performance.
 \small \begin{verbatim}
   inline TOuputPixel operator()( const TInputPixel &input )
@@ -157,7 +159,7 @@ performance.
     m_SquareSum = m_SquareSum + vnl_math_sqr( (TOuputPixel) input );
     }
 \end{verbatim} \normalsize
-\verb$GetValue()$ is called to set the value of the result image. In that example, the
+\verb$GetValue()$ is called to set the value of the pixel in the output image. In that example, the
 sum is just returned, but more complex computations can be done here (see the
 \verb$MedianProjectionImageFilter$'s code for an example). \verb$ProjectionImageFilter$ cast the
 output of this method to the output image's pixel type.
@@ -173,7 +175,7 @@ The internal attribute which accumulate the square sum.
 };
 } // end namespace Function
 \end{verbatim} \normalsize
-The class is declared. It inherits from ProjectionImageFilter, and declares the
+The class is declared. It inherits from \verb$ProjectionImageFilter$, and declares the
 usual types and methods.
 \small \begin{verbatim}
 template <class TInputImage, class TOutputImage>
@@ -218,11 +220,18 @@ That's all.
 \section{Performance}
 
 A timing test comparing performance on a $371 \times 371 \times 34$
-image showed that the results are similar with AccumulateImageFilter
-and the equivalent ProjectionImageFilter, and that the new projection
-types have similar performance. The results achieved on an Athlon 64 
-Processor 2800+ (1802 MHz) with 512Kb cache, 512 Mb of RAM and gcc
-4.0.2 are shown in Table~\ref{perf}.
+image showed that the new filter outperform the current implementation,
+while it should have very similar performance.
+This is the result of a problem in ITK 2.4.1, where the iterator with index
+is a lot more efficient than the one without index. The new implementation
+use the iterator with index for best performance, but really don't need
+it, and should get even better performance with the iterator without
+index once this problem will be fixed.
+
+ The results achieved on an server with 4 Intel(R) Xeon(TM) MP CPU 3.66GHz
+with 1024Kb cache, 24 Gb of RAM, hyperthreading activated, gcc
+3.4.3 and running Mandriva Linux are shown in Table~\ref{perf} and
+Figure~\ref{results}.
 
 \begin{table}[htbp]
 \centering
@@ -231,24 +240,40 @@ Processor 2800+ (1802 MHz) with 512Kb cache, 512 Mb of RAM and gcc
 Filter & execution time \\
 \hline
 \hline
-MaximumProjectionImageFilter & 0.652 s \\
-MinimumProjectionImageFilter  & 0.614 s\\
-SumProjectionImageFilter  & 0.614 s\\
-MeanProjectionImageFilter  & 0.619 s\\
-MedianProjectionImageFilter  & 0.831 s\\
-AccumulateImageFilter, sum  & 0.615 s\\
-AccumulateImageFilter, mean  & 0.617 s\\
+\verb$MaximumProjectionImageFilter$ & 0.0841 s \\
+\verb$MinimumProjectionImageFilter$  & 0.0846 s\\
+\verb$SumProjectionImageFilter$  & 0.0872 s\\
+\verb$MeanProjectionImageFilter$  & 0.0828 s\\
+\verb$MedianProjectionImageFilter$  & 0.164 s\\
+\verb$SigmaProjectionImageFilter$  & 0.123 s\\
+\verb$BinaryProjectionImageFilter$  & 0.0848 s\\
+\verb$AccumulateImageFilter$, sum  & 0.465 s\\
+\verb$AccumulateImageFilter$, mean  & 0.465 s\\
 \hline
 \end{tabular}
-\caption{Execution time.\label{perf}}
+\caption{Execution time with a single thread.\label{perf}}
 \end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{results}
+\caption{Execution time with an increasing number of threads.\label{results}}
+\end{figure}
+
+Figure~\ref{results} show a important increase of performance while using several
+threads\footnote{It also show that the execution time is not really stable
+and that the mean of 50 execution time is not enough to compare the execution
+time with precision. This will be discussed in another article.}.
+
+Note that above 4 threads, the execution times are still decreasing. In that case,
+hyperthreading give an increase of performance.
 
 \section{Examples}
 Figure~\ref{maximum0}, Figure~\ref{maximum1}, Figure~\ref{maximum},
 Figure~\ref{minimum}, Figure~\ref{mean}, Figure~\ref{median},
 Figure~\ref{sigma} and Figure~\ref{binary100} show the result
 of different projection on different axes. The result of
-SumProjectionImageFilter in similar to the result of MeanProjectionImageFilter,
+\verb$SumProjectionImageFilter$ in similar to the result of \verb$MeanProjectionImageFilter$,
 but with a higher range of values, and so is not shown here.
 
 \begin{figure}[htbp]
@@ -373,7 +398,7 @@ int main(int, char * argv[])
 \section{Conclusion}
 The new classes give more feature and more flexibility with equivalent
 performance than the current available filter, but loss the compatibility with
-the previous filter. I propose to mark AccumulateImageFilter as deprecated in
+the previous filter. I propose to mark \verb$AccumulateImageFilter$ as deprecated in
 the next release of ITK to incite ITK user to use the new class.
 
 
