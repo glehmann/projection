@@ -111,67 +111,94 @@ int main(int, char * argv[])
       sigma->UpdateLargestPossibleRegion();
       binary->UpdateLargestPossibleRegion();
 	 
-      for( int i=0; i<50; i++ )
+      for( int i=0; i<10; i++ )
         {
         maxtime.Start();
-        max->Update();
+        for( int j=0; j<10; j++ )
+          {
+          max->Update();
+          max->Modified();
+          }
         maxtime.Stop();
-        max->Modified();
-  
+
         mintime.Start();
-        min->Update();
+        for( int j=0; j<10; j++ )
+          {
+          min->Update();
+          min->Modified();
+          }
         mintime.Stop();
-        min->Modified();
   
         sumtime.Start();
-        sum->Update();
+        for( int j=0; j<10; j++ )
+          {
+          sum->Update();
+          sum->Modified();
+          }
         sumtime.Stop();
-        sum->Modified();
   
         accSumtime.Start();
-        accSum->Update();
+        for( int j=0; j<10; j++ )
+          {
+          accSum->Update();
+          accSum->Modified();
+          }
         accSumtime.Stop();
-        accSum->Modified();
   
         meantime.Start();
-        mean->Update();
+        for( int j=0; j<10; j++ )
+          {
+          mean->Update();
+          mean->Modified();
+          }
         meantime.Stop();
-        mean->Modified();
   
         accMeantime.Start();
-        accMean->Update();
+        for( int j=0; j<10; j++ )
+          {
+          accMean->Update();
+          accMean->Modified();
+          }
         accMeantime.Stop();
-        accMean->Modified();
   
         mediantime.Start();
-        median->Update();
+        for( int j=0; j<10; j++ )
+          {
+          median->Update();
+          median->Modified();
+          }
         mediantime.Stop();
-        median->Modified();
   
         sigmatime.Start();
-        sigma->Update();
+        for( int j=0; j<10; j++ )
+          {
+          sigma->Update();
+          sigma->Modified();
+          }
         sigmatime.Stop();
-        sigma->Modified();
   
         binarytime.Start();
-        binary->Update();
+        for( int j=0; j<10; j++ )
+          {
+          binary->Update();
+          binary->Modified();
+          }
         binarytime.Stop();
-        binary->Modified();
   
         }
         
       std::cout << std::setprecision(3)
                 << d << "\t" 
 	        << reader->GetOutput()->GetLargestPossibleRegion().GetSize()[d] << "\t"
-                << maxtime.GetMeanTime() << "\t" 
-                << mintime.GetMeanTime() << "\t" 
-                << sumtime.GetMeanTime() << "\t" 
-                << accSumtime.GetMeanTime() << "\t" 
-                << meantime.GetMeanTime() << "\t" 
-                << accMeantime.GetMeanTime() << "\t" 
-                << mediantime.GetMeanTime() << "\t" 
-                << sigmatime.GetMeanTime() << "\t" 
-                << binarytime.GetMeanTime() << "\t" 
+                << maxtime.GetMeanTime() / 10 << "\t" 
+                << mintime.GetMeanTime() / 10 << "\t" 
+                << sumtime.GetMeanTime() / 10 << "\t" 
+                << accSumtime.GetMeanTime() / 10 << "\t" 
+                << meantime.GetMeanTime() / 10 << "\t" 
+                << accMeantime.GetMeanTime() / 10 << "\t" 
+                << mediantime.GetMeanTime() / 10 << "\t" 
+                << sigmatime.GetMeanTime() / 10 << "\t" 
+                << binarytime.GetMeanTime() / 10 << "\t" 
                 <<std::endl;
       }
   
