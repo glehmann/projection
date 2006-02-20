@@ -59,7 +59,7 @@ int main(int, char * argv[])
   
   
   std::cout << "#th" << "\t" 
-            << "#max" << "\t" 
+            << "max" << "\t" 
             << "min" << "\t" 
             << "sum" << "\t" 
             << "mean" << "\t" 
