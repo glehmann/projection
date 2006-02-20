@@ -22,6 +22,7 @@
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionConstIteratorWithIndex.h"
 #include "itkProgressReporter.h"
+#include "itkImageLinearConstIteratorWithIndex.h"
 
 
 namespace itk
@@ -155,64 +156,73 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
     itkExceptionMacro(<<"ProjectionImageFilter: invalid dimension to accumulate. ProjectionDimension = " << m_ProjectionDimension);
     }
 
+  // use the output image to report the progress: there is no need to call CompletedPixel()
+  // for all input pixel
   ProgressReporter progress(this, threadId, outputRegionForThread.GetNumberOfPixels());
 
   typedef typename TOutputImage::PixelType OutputPixelType;
-  typedef typename NumericTraits<OutputPixelType>::AccumulateType AccumulateType;
   
+  // get some values, just to be easier to manipulate
   typename Superclass::InputImageConstPointer  inputImage = this->GetInput();
+  typename TInputImage::RegionType inputRegion = inputImage->GetLargestPossibleRegion();
+  typename TInputImage::SizeType inputSize = inputRegion.GetSize();
+  typename TInputImage::IndexType inputIndex = inputRegion.GetIndex();
+
   typename TOutputImage::Pointer outputImage = this->GetOutput();
+  typename TOutputImage::RegionType outputRegion = outputImage->GetLargestPossibleRegion();
+  typename TOutputImage::SizeType outputSize = outputRegion.GetSize();
+  typename TOutputImage::IndexType outputIndex = outputRegion.GetIndex();
 
-// Accumulate over the Nth dimension ( = m_ProjectionDimension)
-  typedef ImageRegionIterator<TOutputImage> outputIterType;
-  outputIterType outputIter(outputImage, outputRegionForThread);
-  typedef ImageRegionConstIteratorWithIndex<TInputImage> inputIterType;
-  
-  typename TInputImage::RegionType AccumulatedRegion;
-  typename TInputImage::SizeType AccumulatedSize = inputImage->GetLargestPossibleRegion().GetSize();
-  typename TInputImage::IndexType AccumulatedIndex = inputImage->GetLargestPossibleRegion().GetIndex();
-
-  unsigned long SizeProjectionDimension = AccumulatedSize[m_ProjectionDimension];
-  double SizeProjectionDimensionDouble = static_cast<double>(SizeProjectionDimension);
-  long IndexProjectionDimension = AccumulatedIndex[m_ProjectionDimension];
-  for(unsigned int i=0; i< InputImageDimension; i++)
+  // compute the input region for this thread
+  typename TInputImage::RegionType inputRegionForThread = inputRegion;
+  typename TInputImage::SizeType inputSizeForThread = inputSize;
+  typename TInputImage::IndexType inputIndexForThread = inputIndex;
+  for( unsigned int i=0; i< InputImageDimension; i++ )
     {
-    if (i != m_ProjectionDimension )
+    if( i != m_ProjectionDimension )
       {
-      AccumulatedSize[i] = 1;
+      inputSizeForThread[i] = outputSize[i];
+      inputIndexForThread[i] = outputIndex[i];
       }
     }
-  AccumulatorType accumulator = this->NewAccumulator( SizeProjectionDimension );
-  AccumulatedRegion.SetSize(AccumulatedSize);
-  outputIter.GoToBegin();
-  while(!outputIter.IsAtEnd())
+  inputRegionForThread.SetSize( inputSizeForThread );
+  inputRegionForThread.SetIndex( inputIndexForThread );
+
+  unsigned long projectionSize = inputSize[m_ProjectionDimension];
+
+  // create the iterators for input and output image
+  typedef ImageLinearConstIteratorWithIndex<TInputImage> InputIteratorType;
+  InputIteratorType iIt( inputImage, inputRegionForThread );
+  iIt.SetDirection( m_ProjectionDimension );
+  iIt.GoToBegin();
+
+  // instantiate the accumulator
+  AccumulatorType accumulator = this->NewAccumulator( projectionSize );
+
+  // ok, everything is ready... lets the linear iterator do its job !
+  while( !iIt.IsAtEnd() )
     {
+    // init the accumulator before a new set of pixels
     accumulator.Init();
-    typename TOutputImage::IndexType OutputIndex = outputIter.GetIndex();
-    for(unsigned int i=0; i<InputImageDimension; i++)
-      {
-      if (i != m_ProjectionDimension)
-        {
-        AccumulatedIndex[i] = OutputIndex[i];
-        }
-      else
-        {
-        AccumulatedIndex[i] = IndexProjectionDimension;
-        }
-      }
-    AccumulatedRegion.SetIndex(AccumulatedIndex);
-    inputIterType inputIter(inputImage, AccumulatedRegion);
-    inputIter.GoToBegin();
 
-    while(!inputIter.IsAtEnd())
+    while( !iIt.IsAtEndOfLine() )
       {
-      accumulator(inputIter.Get());
-      ++inputIter;
+      accumulator( iIt.Get() );
+      ++iIt;
       }
-    outputIter.Set(static_cast<OutputPixelType>(accumulator.GetValue()));
+
+    // move the ouput iterator and set the output value
+    typename TOutputImage::IndexType oIdx = iIt.GetIndex();
+    oIdx[ m_ProjectionDimension ] = 0;
+    outputImage->SetPixel( oIdx, static_cast<OutputPixelType>( accumulator.GetValue() ) );
+
+    // one more line done !
     progress.CompletedPixel();
-    ++outputIter;
+
+    // continue with the next one
+    iIt.NextLine();
     }
+
 }
 
 
