@@ -97,6 +97,10 @@ SET(CurrentExe "maxdim")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 
+SET(CurrentExe "maxdim2D")
+ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
+TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
+
 #the following line is an example of how to add a test to your project.
 #Testname is the title for this particular test.  ExecutableToRun is the
 #program which will be running this test.  It can either be a part of this
@@ -146,3 +150,13 @@ ADD_TEST(Maximum1CompareImage ${IMAGE_COMPARE} maximum1.tif ${CMAKE_SOURCE_DIR}/
 
 ADD_TEST(Maximum2 maxdim 2 ${INPUT_IMAGE} maximum2.tif)
 ADD_TEST(Maximum2CompareImage ${IMAGE_COMPARE} maximum2.tif ${CMAKE_SOURCE_DIR}/images/maximum.tif)
+
+
+ADD_TEST(Maximum2D0 maxdim2D 0 ${INPUT_IMAGE} maximum0.tif)
+ADD_TEST(Maximum2D0CompareImage ${IMAGE_COMPARE} maximum0.tif ${CMAKE_SOURCE_DIR}/images/maximum0.tif)
+
+ADD_TEST(Maximum2D1 maxdim2D 1 ${INPUT_IMAGE} maximum1.tif)
+ADD_TEST(Maximum2D1CompareImage ${IMAGE_COMPARE} maximum1.tif ${CMAKE_SOURCE_DIR}/images/maximum1.tif)
+
+ADD_TEST(Maximum2D2 maxdim2D 2 ${INPUT_IMAGE} maximum2.tif)
+ADD_TEST(Maximum2D2CompareImage ${IMAGE_COMPARE} maximum2.tif ${CMAKE_SOURCE_DIR}/images/maximum.tif)

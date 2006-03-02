@@ -79,9 +79,9 @@ public:
                       TOutputImage::ImageDimension);
 
   /** Input and output images must be the same dimension. */
-  itkConceptMacro(ImageDimensionCheck,
-      (Concept::SameDimension<itkGetStaticConstMacro(InputImageDimension),
-                              itkGetStaticConstMacro(OutputImageDimension)>));
+//   itkConceptMacro(ImageDimensionCheck,
+//       (Concept::SameDimension<itkGetStaticConstMacro(InputImageDimension),
+//                               itkGetStaticConstMacro(OutputImageDimension)>));
 
   /** Set the direction in which to accumulate the data.  It must be
    * set before the update of the filter. Defaults to the last

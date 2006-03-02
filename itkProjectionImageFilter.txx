@@ -68,21 +68,46 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
 
   // Set the LargestPossibleRegion of the output.
   // Reduce the size of the accumulated dimension.
-  for(unsigned int i = 0; i<InputImageDimension; i++)
+
+  if( InputImageDimension == OutputImageDimension )
     {
-    if (i != m_ProjectionDimension)
+    for(unsigned int i = 0; i<InputImageDimension; i++)
       {
-      outputSize[i]  = inputSize[i];
-      outputIndex[i] = inputIndex[i];
-      outSpacing[i] = inSpacing[i];
-      outOrigin[i]  = inOrigin[i];
+      if (i != m_ProjectionDimension)
+        {
+        outputSize[i]  = inputSize[i];
+        outputIndex[i] = inputIndex[i];
+        outSpacing[i] = inSpacing[i];
+        outOrigin[i]  = inOrigin[i];
+        }
+      else
+        {
+        outputSize[i]  = 1;
+        outputIndex[i] = 0;
+        outSpacing[i] = inSpacing[i]*inputSize[i];
+        outOrigin[i]  = inOrigin[i] + (i-1)*inSpacing[i]/2;
+        }
       }
-    else
+    }
+  else
+    {
+    // assume OutputImageDimension = InputImageDimension - 1
+    for(unsigned int i = 0; i<OutputImageDimension; i++)
       {
-      outputSize[i]  = 1;
-      outputIndex[i] = 0;
-      outSpacing[i] = inSpacing[i]*inputSize[i];
-      outOrigin[i]  = inOrigin[i] + (i-1)*inSpacing[i]/2;
+      if (i != m_ProjectionDimension)
+        {
+        outputSize[i]  = inputSize[i];
+        outputIndex[i] = inputIndex[i];
+        outSpacing[i] = inSpacing[i];
+        outOrigin[i]  = inOrigin[i];
+        }
+      else
+        {
+        outputSize[i]  = inputSize[OutputImageDimension - 1];
+        outputIndex[i] = inputIndex[OutputImageDimension - 1];
+        outSpacing[i] = inSpacing[OutputImageDimension - 1];
+        outOrigin[i]  = inOrigin[OutputImageDimension - 1];
+        }
       }
     }
 
@@ -93,6 +118,9 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
   output->SetLargestPossibleRegion(outputRegion);
 
   itkDebugMacro("GenerateOutputInformation End");
+
+std::cout<< "outputSize:" << outputSize << " outputIndex:" << outputIndex << std::endl;
+
 }
 
 
@@ -119,22 +147,46 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
     inputLargSize = this->GetInput()->GetLargestPossibleRegion().GetSize();
     inputLargIndex = this->GetInput()->GetLargestPossibleRegion().GetIndex();
 
-    for(unsigned int i=0; i<TInputImage::ImageDimension; i++)
+    if( InputImageDimension == OutputImageDimension )
       {
-      if(i!=m_ProjectionDimension)
+      for(unsigned int i=0; i<TInputImage::ImageDimension; i++)
         {
-        inputSize[i] = outputSize[i];
-        inputIndex[i] = outputIndex[i];
+        if(i!=m_ProjectionDimension)
+          {
+          inputSize[i] = outputSize[i];
+          inputIndex[i] = outputIndex[i];
+          }
+        else
+          {
+          inputSize[i]=inputLargSize[i];
+          inputIndex[i]=inputLargIndex[i];
+          }
         }
-      else
+      }
+    else
+      {
+      for(unsigned int i=0; i<OutputImageDimension; i++)
         {
-        inputSize[i]=inputLargSize[i];
-        inputIndex[i]=inputLargIndex[i];
+        if(i!=m_ProjectionDimension)
+          {
+          inputSize[i] = outputSize[i];
+          inputIndex[i] = outputIndex[i];
+          }
+        else
+          {
+          // the size of the output image on this dimension is the size
+          // of the input image on the removed dimension
+          inputSize[InputImageDimension - 1] = outputSize[i];
+          inputIndex[InputImageDimension - 1] = outputIndex[i];
+          }
         }
+        inputSize[m_ProjectionDimension] = inputLargSize[m_ProjectionDimension];
+        inputIndex[m_ProjectionDimension] = inputLargIndex[m_ProjectionDimension];
       }
 
     RequestedRegion.SetSize(inputSize);
     RequestedRegion.SetIndex(inputIndex);
+std::cout<< "inputSize:" << inputSize << " inputIndex:" << inputIndex << std::endl;
     InputImagePointer input = const_cast< TInputImage * > ( this->GetInput() );
     input->SetRequestedRegion (RequestedRegion);
     }
@@ -177,13 +229,36 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
   typename TInputImage::RegionType inputRegionForThread = inputRegion;
   typename TInputImage::SizeType inputSizeForThread = inputSize;
   typename TInputImage::IndexType inputIndexForThread = inputIndex;
-  for( unsigned int i=0; i< InputImageDimension; i++ )
+  if( InputImageDimension == OutputImageDimension )
     {
-    if( i != m_ProjectionDimension )
+    for( unsigned int i=0; i< InputImageDimension; i++ )
       {
-      inputSizeForThread[i] = outputSize[i];
-      inputIndexForThread[i] = outputIndex[i];
+      if( i != m_ProjectionDimension )
+        {
+        inputSizeForThread[i] = outputSize[i];
+        inputIndexForThread[i] = outputIndex[i];
+        }
       }
+    }
+  else
+    {
+    for(unsigned int i=0; i<OutputImageDimension; i++)
+      {
+      if(i!=m_ProjectionDimension)
+        {
+        inputSizeForThread[i] = outputSize[i];
+        inputIndexForThread[i] = outputIndex[i];
+        }
+      else
+        {
+        // the size of the output image on this dimension is the size
+        // of the input image on the removed dimension
+        inputSizeForThread[InputImageDimension - 1] = outputSize[i];
+        inputIndexForThread[InputImageDimension - 1] = outputIndex[i];
+        }
+      }
+      inputSizeForThread[m_ProjectionDimension] = inputSize[m_ProjectionDimension];
+      inputIndexForThread[m_ProjectionDimension] = inputIndex[m_ProjectionDimension];
     }
   inputRegionForThread.SetSize( inputSizeForThread );
   inputRegionForThread.SetIndex( inputIndexForThread );
@@ -198,6 +273,7 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
 
   // instantiate the accumulator
   AccumulatorType accumulator = this->NewAccumulator( projectionSize );
+std::cout<< "inputSizeForThread:" << inputSizeForThread << " inputIndexForThread:" << inputIndexForThread << std::endl;
 
   // ok, everything is ready... lets the linear iterator do its job !
   while( !iIt.IsAtEnd() )
@@ -212,8 +288,30 @@ ProjectionImageFilter<TInputImage,TOutputImage,TAccumulator>
       }
 
     // move the ouput iterator and set the output value
-    typename TOutputImage::IndexType oIdx = iIt.GetIndex();
-    oIdx[ m_ProjectionDimension ] = 0;
+    typename TOutputImage::IndexType oIdx;
+    typename TInputImage::IndexType iIdx = iIt.GetIndex();
+    if( InputImageDimension == OutputImageDimension )
+      {
+      for( unsigned int i=0; i< InputImageDimension; i++ )
+        {
+        if( i != m_ProjectionDimension )
+          { oIdx[i] = iIdx[i]; }
+        else
+          { oIdx[i] = 0; }
+        }
+      }
+    else
+      {
+      for( unsigned int i=0; i< OutputImageDimension; i++ )
+        {
+        if( i != m_ProjectionDimension )
+          { oIdx[i] = iIdx[i]; }
+        else
+          { oIdx[i] = iIdx[OutputImageDimension - 1]; }
+        }
+      }
+std::cout<< "oIdx:" << oIdx  << std::endl;
+
     outputImage->SetPixel( oIdx, static_cast<OutputPixelType>( accumulator.GetValue() ) );
 
     // one more line done !
