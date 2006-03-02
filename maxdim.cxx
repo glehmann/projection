@@ -13,7 +13,6 @@ int main(int, char * argv[])
 
   typedef unsigned char PType;
   typedef itk::Image< PType, 3 > IType;
-  typedef itk::Image< PType, 2 > IType2;
 
   typedef itk::ImageFileReader< IType > ReaderType;
   ReaderType::Pointer reader = ReaderType::New();
@@ -29,39 +28,9 @@ int main(int, char * argv[])
 
   itk::SimpleFilterWatcher watcher(filter, "filter");
 
-  filter->Update();
-
-  IType::SizeType inputSize = filter->GetOutput()->GetLargestPossibleRegion().GetSize();
-
-  typedef itk::ExtractImageFilter< IType, IType2 > ExtractType;
-  ExtractType::Pointer extract = ExtractType::New();
-  extract->SetInput( filter->GetOutput() );
-
-  IType::SizeType size;
-  for(int i=0; i<=3; i++) {
-    if(i == dim) {
-      size[i] = 0;
-    } else {
-      size[i] = inputSize[i];
-     }
-  }
-  IType::IndexType idx;
-  idx.Fill(0);
-
-  IType::RegionType region;
-  region.SetSize( size );
-  region.SetIndex( idx );
-  extract->SetExtractionRegion( region );
-
-  std::cout << "size: " << size << std::endl;
-  std::cout << "index: " << idx << std::endl;
-
-  extract->Update();
-  std::cout << "output size: " << extract->GetOutput()->GetLargestPossibleRegion().GetSize() << std::endl;
-
-  typedef itk::ImageFileWriter< IType2 > WriterType;
+  typedef itk::ImageFileWriter< IType > WriterType;
   WriterType::Pointer writer = WriterType::New();
-  writer->SetInput( extract->GetOutput() );
+  writer->SetInput( filter->GetOutput() );
   writer->SetFileName( argv[3] );
   writer->Update();
 

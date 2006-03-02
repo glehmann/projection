@@ -152,11 +152,11 @@ ADD_TEST(Maximum2 maxdim 2 ${INPUT_IMAGE} maximum2.tif)
 ADD_TEST(Maximum2CompareImage ${IMAGE_COMPARE} maximum2.tif ${CMAKE_SOURCE_DIR}/images/maximum.tif)
 
 
-ADD_TEST(Maximum2D0 maxdim2D 0 ${INPUT_IMAGE} maximum0.tif)
-ADD_TEST(Maximum2D0CompareImage ${IMAGE_COMPARE} maximum0.tif ${CMAKE_SOURCE_DIR}/images/maximum0.tif)
+ADD_TEST(Maximum2D0 maxdim2D 0 ${INPUT_IMAGE} maximum2D0.tif)
+ADD_TEST(Maximum2D0CompareImage ${IMAGE_COMPARE} maximum2D0.tif ${CMAKE_SOURCE_DIR}/images/maximum2D0.tif)
 
-ADD_TEST(Maximum2D1 maxdim2D 1 ${INPUT_IMAGE} maximum1.tif)
-ADD_TEST(Maximum2D1CompareImage ${IMAGE_COMPARE} maximum1.tif ${CMAKE_SOURCE_DIR}/images/maximum1.tif)
+ADD_TEST(Maximum2D1 maxdim2D 1 ${INPUT_IMAGE} maximum2D1.tif)
+ADD_TEST(Maximum2D1CompareImage ${IMAGE_COMPARE} maximum2D1.tif ${CMAKE_SOURCE_DIR}/images/maximum2D1.tif)
 
-ADD_TEST(Maximum2D2 maxdim2D 2 ${INPUT_IMAGE} maximum2.tif)
-ADD_TEST(Maximum2D2CompareImage ${IMAGE_COMPARE} maximum2.tif ${CMAKE_SOURCE_DIR}/images/maximum.tif)
+ADD_TEST(Maximum2D2 maxdim2D 2 ${INPUT_IMAGE} maximum2D2.tif)
+ADD_TEST(Maximum2D2CompareImage ${IMAGE_COMPARE} maximum2D2.tif ${CMAKE_SOURCE_DIR}/images/maximum.tif)
