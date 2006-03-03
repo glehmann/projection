@@ -62,14 +62,97 @@ implement different projection methods.
 % \tableofcontents
 
 \section{Introduction}
-ITK already provide a class to project an image along an axis:
-\doxygen{AccumulateImageFilter}. However, this class is limited to sum
-and mean projections.
+Image projection is a very common task in image analysis to reduce the dimension
+of an image. ITK already provide a class to project an image along an axis:
+\doxygen{AccumulateImageFilter}. However, this class is not very efficient,
+hard to extend, and not able to produce an image with a smaller dimension than
+the input image.
 
+Like \verb$AccumulateImageFilter$, \verb$ProjectionImageFilter$ can produce an
+ouput image with the same dimension than the input image. In that case, all
+the informations associated to the input image are copied to the output one,
+and excepted:
+\begin{itemize}
+  \item the size of the image which is set to 1 on the projection dimension,
+  \item the spacing of the image, which is modified on the projection dimension
+to keep the physical size of the image on the output image,
+  \item the index of the image wich is set to 0 on the projection dimension.
+\end{itemize}
+Basically, \verb$ProjectionImageFilter$ produce the same volume but with a
+only 1 pixel on the projection dimension.
+
+Unlike the \verb$AccumulateImageFilter$, \verb$ProjectionImageFilter$ can 
+also produce an ouput image with a dimension lower than the input image.
+While it is logical to produce a 2D image with a projection of a 3D image,
+it also bring some more complex transforms, because the dimensions of the
+input image can't be directly copied to the input image - one dimension is
+removed. \verb$ProjectionImageFilter$ move the removed dimension of the
+input image to the projected dimension in the output image. With a 3D
+input image, the output will be:
+\begin{itemize}
+  \item projection along the axe x:
+	\begin{itemize}
+	\item x is removed
+	\item y stay y in the output image
+	\item z become x in the output image
+	\end{itemize}
+  \item projection along the axe y:
+	\begin{itemize}
+	\item x stay x in the output image
+	\item y is removed
+	\item z become y in the output image
+	\end{itemize}
+  \item projection along the axe z:
+	\begin{itemize}
+	\item x stay x in the output image
+	\item y stay y in the output image
+	\item z is removed.
+	\end{itemize}
+       No dimension is moved in that case.
+\end{itemize}
+
+Also, during the projection, there is an orientation problem which doesn't
+exist if the number of dimensions is kept.
+
+\small \begin{verbatim}
+        ________
+       /       /|            /|
+      /       / |           / |
+ 1   /_______/  |  2       /  |
+ --> |       |  |<--       |  |
+     |       | 0/          | 0/
+     |       | /           | /
+     |_______|/            |/
+\end{verbatim} \normalsize
+ 
+ 
+On the volume above, the image is projected on the horizontal dimension.
+If the number of dimension is not modified, a thin volume with a size of
+1 on projection dimension, and there is no problem.
+ 
+If the number of dimensions is reduced, the direction become important,
+and the result is not the same.
+ 
+\small \begin{verbatim}
+      _______
+     |0      |
+ 1   |       |
+     |_______|
+      _______
+     |      0|
+ 2   |       |
+     |_______|
+\end{verbatim} \normalsize
+ 
+However, we choose to move the dimensions and the indexes on those
+dimensions, and so to not provide the ability to choose the direction.
+The image is always projected with direction 1.
+The user can still modify the output image with ITK filters like
+\doxygen{FlipImageFilter}.
 
 \section{Implementation}
 
-The base class, \verb$ProjectionImageFilter$, is mainly a copy of
+The base class, \verb$ProjectionImageFilter$, is a re-write of
 \verb$AccumulateImageFilter$, with some enhancement:
 \begin{itemize}
   \item projection is delegated to a functor
@@ -279,7 +362,10 @@ but with a higher range of values, and so is not shown here.
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.75]{maximum2D0}
-\caption{MaximumProjectionImageFilter, projection along axis x.\label{maximum0}}
+\caption{MaximumProjectionImageFilter, projection along axis x. Note that the orientation
+is the correct one: the axis z (34 pixels) have been moved to the axis x, and the axis y
+(371 pixels) is not modified. Also, the image shown here does not respect the spacing
+of the image, but ProjectionImageFilter does.\label{maximum0}}
 \end{figure}
 
 \begin{figure}[htbp]
