@@ -38,8 +38,8 @@ int main(int, char * argv[])
             << "max" << "\t" 
             << std::endl;
 
-  const int rep1 = 50;
-  const int rep2 = 100;
+  const int rep1 = 1000;
+  const int rep2 = 1;
   const int maxNbOfThreads = 10;
 
   std::vector< itk::TimeProbe > timeProbes;
