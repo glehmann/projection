@@ -56,7 +56,7 @@ colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 \noindent
 Image projection is a very common task in image analysis to reduce the dimension
 of an image. A base filter is provided with some specialized filters which
-implement different projection methods.
+implement efficiently different projection methods.
 \end{abstract}
 
 % \tableofcontents
@@ -78,7 +78,7 @@ and excepted:
 to keep the physical size of the image on the output image,
   \item the index of the image wich is set to 0 on the projection dimension.
 \end{itemize}
-Basically, \verb$ProjectionImageFilter$ produce the same volume but with a
+Basically, \verb$ProjectionImageFilter$ produce the same volume but with
 only 1 pixel on the projection dimension.
 
 Unlike the \verb$AccumulateImageFilter$, \verb$ProjectionImageFilter$ can 
@@ -144,8 +144,8 @@ and the result is not the same.
      |_______|
 \end{verbatim} \normalsize
  
-However, we choose to move the dimensions and the indexes on those
-dimensions, and so to not provide the ability to choose the direction.
+However, we choose to move the dimensions {\em and} the indexes on those
+dimensions, and so, to not provide the ability to choose the direction.
 The image is always projected with direction 1.
 The user can still modify the output image with ITK filters like
 \doxygen{FlipImageFilter}.
@@ -155,9 +155,10 @@ The user can still modify the output image with ITK filters like
 The base class, \verb$ProjectionImageFilter$, is a re-write of
 \verb$AccumulateImageFilter$, with some enhancement:
 \begin{itemize}
-  \item projection is delegated to a functor
-  \item report its progress
-  \item thread support
+  \item projection is delegated to a functor,
+  \item report its progress,
+  \item thread support,
+  \item dimension of ouput image can be smaller than dimension of the input image.
 \end{itemize}
 Different projection types are provided, with specialized classes:
 \begin{itemize}
@@ -303,35 +304,38 @@ That's all.
 \section{Performance}
 
 A timing test comparing performance on a $371 \times 371 \times 34$
-image showed that the new filter outperform the current implementation,
-while it should have very similar performance.
-This is the result of a problem in ITK 2.4.1, where the iterator with index
-is a lot more efficient than the one without index. The new implementation
-use the iterator with index for best performance, but really don't need
-it, and should get even better performance with the iterator without
-index once this problem will be fixed.
+image showed that the new filter have better performance than the
+\verb$AccumulateImageFilter$ for axis y and z, but worth for the x
+axis. This is the result of the usage of a linear iterator in
+\verb$ProjectionImageFilter$ and an image region iterator in
+\verb$AccumulateImageFilter$.
 
  The results achieved on an server with 4 Intel(R) Xeon(TM) MP CPU 3.66GHz
 with 1024Kb cache, 24 Gb of RAM, hyperthreading activated, gcc
 3.4.3 and running Mandriva Linux are shown in Table~\ref{perf} and
 Figure~\ref{results}.
 
+% #dim    size    max     min     sum     accSum  mean    accMean median  sigma   binary
+% 0       371     0.02    0.02    0.0116  0.0128  0.0105  0.0128  0.0619  0.0504  0.019
+% 1       371     0.0218  0.0218  0.0157  0.425   0.0153  0.424   0.0705  0.0538  0.021
+% 2       34      0.0308  0.0308  0.0222  0.459   0.0223  0.46    0.104   0.0683  0.0299
 \begin{table}[htbp]
 \centering
-\begin{tabular}{cc}
+\begin{tabular}{cccc}
 \hline
-Filter & Execution time \\
+Filter & Axis: x & Axis: y & Axis: z \\
 \hline
 \hline
-\verb$MaximumProjectionImageFilter$ & 0.0841 s \\
-\verb$MinimumProjectionImageFilter$  & 0.0846 s\\
-\verb$SumProjectionImageFilter$  & 0.0872 s\\
-\verb$MeanProjectionImageFilter$  & 0.0828 s\\
-\verb$MedianProjectionImageFilter$  & 0.164 s\\
-\verb$SigmaProjectionImageFilter$  & 0.123 s\\
-\verb$BinaryProjectionImageFilter$  & 0.0848 s\\
-\verb$AccumulateImageFilter$, sum  & 0.465 s\\
-\verb$AccumulateImageFilter$, mean  & 0.465 s\\
+\verb$MaximumProjectionImageFilter$  & 0.02 s   & 0.0218 s & 0.0308 s \\
+\verb$MinimumProjectionImageFilter$  & 0.02 s   & 0.0218 s & 0.0308 s\\
+\verb$MedianProjectionImageFilter$   & 0.0619 s & 0.0705 s & 0.104 s \\
+\verb$SigmaProjectionImageFilter$    & 0.0504 s & 0.0538 s & 0.0683 s\\
+\verb$BinaryProjectionImageFilter$   & 0.019  s & 0.021 s  & 0.0299 s\\
+\verb$SumProjectionImageFilter$      & 0.0116 s & 0.0157 s & 0.0222 s\\
+\verb$MeanProjectionImageFilter$     & 0.0105 s & 0.0153 s & 0.0223 s\\
+\hline
+\verb$AccumulateImageFilter$, sum    & 0.0128 s & 0.425 s  & 0.459 s \\
+\verb$AccumulateImageFilter$, mean   & 0.0128 s & 0.424 s  & 0.46 s  \\
 \hline
 \end{tabular}
 \caption{Execution time with a single thread.\label{perf}}
@@ -340,13 +344,46 @@ Filter & Execution time \\
 \begin{figure}[htbp]
 \centering
 \includegraphics{results}
-\caption{Execution time with an increasing number of threads.\label{results}}
+\caption{Execution time with an increasing number of threads. Projection axis is z.\label{results}}
 \end{figure}
 
-Figure~\ref{results} show an important increase of performance while using several
-threads\footnote{It also show that the execution time is not really stable
-and that the mean of 50 execution time is not enough to compare the execution
-time with precision. This will be discussed in another article.}.
+% #th     max
+% 1       0.0311
+% 2       0.0197
+% 3       0.017
+% 4       0.0161
+% 5       0.015
+% 6       0.013
+% 7       0.0119
+% 8       0.0108
+% 9       0.0116
+% 10      0.0115
+\begin{table}[htbp]
+\centering
+\begin{tabular}{ccc}
+\hline
+Number of threads & Execution time & Speedup \\
+\hline
+\hline
+1      & 0.0311 s & 1 \\
+2      & 0.0197 s & 1.58\\
+3      & 0.017  s & 1.83\\
+4      & 0.0161 s & 1.93\\
+5      & 0.015  s & 2.07\\
+6      & 0.013  s & 2.39\\
+7      & 0.0119 s & 2.61\\
+8      & 0.0108 s & 2.88\\
+9      & 0.0116 s & 2.68\\
+10     & 0.0115 s & 2.7\\
+\hline
+\end{tabular}
+\caption{Execution time and speedup with an increasing number of threads.\label{thread}}
+\end{table}
+
+
+
+Figure~\ref{results} and Table~\ref{thread} show an important increase of performance while using several
+threads.
 
 Note that above 4 threads, the execution times are still decreasing. In that case,
 hyperthreading give an increase of performance.
