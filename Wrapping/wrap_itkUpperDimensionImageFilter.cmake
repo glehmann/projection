@@ -1,4 +1,4 @@
-WRAP_CLASS("itk::MaximumProjectionImageFilter" POINTER_WITH_SUPERCLASS)
+WRAP_CLASS("itk::UpperDimensionImageFilter" POINTER)
   # increment the output dimension by 1, if possible
   FOREACH(t ${WRAP_ITK_SCALAR})
     FOREACH(d ${WRAP_ITK_DIMS})
