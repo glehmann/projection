@@ -102,8 +102,8 @@ UpperDimensionImageFilter<TInputImage,TOutputImage>
   output->SetLargestPossibleRegion(outputRegion);
 
   itkDebugMacro("GenerateOutputInformation End");
-std::cout <<  "outputSize" << outputSize <<std::endl;
-std::cout <<  "outputIndex" << outputIndex <<std::endl;
+/*  std::cout <<  "outputSize" << outputSize <<std::endl;
+  std::cout <<  "outputIndex" << outputIndex <<std::endl;*/
 }
 
 
@@ -148,8 +148,8 @@ UpperDimensionImageFilter<TInputImage,TOutputImage>
     RequestedRegion.SetIndex(inputIndex);
     InputImagePointer input = const_cast< TInputImage * > ( this->GetInput() );
     input->SetRequestedRegion(RequestedRegion);
-std::cout <<  "inputSize" << inputSize <<std::endl;
-std::cout <<  "inputIndex" << inputIndex <<std::endl;
+/*    std::cout <<  "inputSize" << inputSize <<std::endl;
+    std::cout <<  "inputIndex" << inputIndex <<std::endl;*/
     }
 
   itkDebugMacro("GenerateInputRequestedRegion End");
