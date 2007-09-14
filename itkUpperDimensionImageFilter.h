@@ -93,8 +93,8 @@ public:
   itkGetMacro( NewDimensionOrig, double );
   itkSetMacro( NewDimensionOrig, double );
 
-  itkGetMacro( NewDimensionIndex, unsigned long );
-  itkSetMacro( NewDimensionIndex, unsigned long );
+  itkGetMacro( NewDimensionIndex, long );
+  itkSetMacro( NewDimensionIndex, long );
 
   itkGetMacro( NewDimensionSize, unsigned long );
   itkSetMacro( NewDimensionSize, unsigned long );
@@ -122,7 +122,7 @@ private:
 
   double m_NewDimensionOrig;
 
-  unsigned long m_NewDimensionIndex;
+  long m_NewDimensionIndex;
 
   unsigned long m_NewDimensionSize;
 
